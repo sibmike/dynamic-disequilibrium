@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "edem"
+version = "0.1.0"
+description = "Estimated Dynamic Equilibrium Model: a Mesa-based agent-based model of real-estate markets with heterogeneous, error-prone valuations."
+authors = [{ name = "Mikhail Arbuzov", email = "mikhail.arbuzov@sjsu.edu" }]
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "mesa>=2.3",
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "pyarrow>=15",          # parquet output
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=5",
+    "ruff>=0.5",
+    "jupyter>=1",
+    "ipykernel>=6",
+]
+
+[tool.setuptools.packages.find]
+include = ["edem*"]
+exclude = ["tests*", "experiments*", "notebooks*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

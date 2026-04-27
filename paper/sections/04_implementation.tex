@@ -1,0 +1,129 @@
+\section{Implementation in Mesa}
+\label{sec:implementation}
+
+EDEM and DE are implemented in the Python agent-based modelling
+framework Mesa~\citep{masad2015mesa}, replacing the earlier NetLogo
+prototypes archived at
+\url{https://github.com/sibmike/netlogo-realestate-simulations}. The
+choice of Mesa is pragmatic: its turtle--patch primitives map cleanly
+onto NetLogo's, but the surrounding Python ecosystem (NumPy, pandas,
+matplotlib, pytest) supports batched experimentation, deterministic
+seeding, and reproducible figure regeneration that the original
+NetLogo code cannot. The Mesa port and all experiments described
+herein are released under MIT licence at
+\url{https://github.com/sibmike/realestate-edem-python}; the
+companion paper sources (CC-BY-4.0) live in the same repository.
+
+\subsection{Spatial structure and agents}
+\label{sec:implementation-space}
+
+The market is staged on \texttt{mesa.space.MultiGrid(32, 32, torus=True)},
+matching the wrapped 32$\times$32 patch world of the original
+NetLogo. Per-cell state ($v_{t}(h)$, $v^{*}(h)$, last sale price,
+last sale tick) is stored as a lightweight \texttt{Home} dataclass
+attached to each grid cell, not as a Mesa Agent --- treating the 1024
+cells as Agents would multiply scheduler overhead without benefit,
+since cells never schedule behaviour.
+
+Buyers and sellers are Mesa Agents:
+\begin{itemize}[leftmargin=*,nosep]
+\item \texttt{Seller} is immobile (one per home), holds an ask price
+      $a_{t}(s)$ and a patience timer, and accumulates incoming bids
+      until the timer elapses.
+\item \texttt{Buyer} is mobile; each tick it executes a NetLogo-style
+      \emph{wiggle} (uniform heading change in $[-90^{\circ}, +90^{\circ}]$)
+      followed by a unit forward step.
+\end{itemize}
+Bids are NetLogo undirected links in the original; we represent them
+as mirrored entries in Python dictionaries on each side (each agent's
+\texttt{bids} dict is keyed by the counterparty). The mirror is
+maintained in a single helper to avoid drift.
+
+\subsection{Market price and clearing}
+\label{sec:implementation-clearing}
+
+For DE, the rolling 25-sale market price of \cref{eq:price-rolling}
+is implemented as a \texttt{collections.deque(maxlen=25)} owned by
+the model. Sales are committed via a single \texttt{complete\_sale}
+method that records the sale, advances the deque, removes both
+counterparties from the grid, and triggers the balancer to spawn a
+replacement pair (per the NetLogo \texttt{add\_seller} /
+\texttt{add\_buyer} idiom).
+
+For the EDEM speculative-market variant, no sales are recorded.
+Instead the model maintains a per-tick \texttt{cycle\_counter}
+initialised to $\texttt{init\_patience} - 1$. When the counter
+reaches zero, the model fires \cref{eq:value-update} on every home in
+a single pass and resets the counter. The off-by-one initialisation is
+deliberate: it ensures the value update reads buyers' \texttt{is\_yellow}
+flags one tick before the buyers' patience timers reset them, matching
+the order of operations in the NetLogo \texttt{to go} procedure.
+
+\subsection{Balancer}
+\label{sec:implementation-balancer}
+
+DE balances populations every $T_{B}$ ticks by recomputing the linear
+target $\hat{Q}_{s}(p), \hat{Q}_{d}(p)$ at the current market price
+and adjusting by one agent in each direction. Spawning a replacement
+on every sale (the NetLogo behaviour) plus this slow drift toward the
+linear target keeps the population near \mbox{$Q_{s}^{*} = Q_{d}^{*}$}
+without introducing artificial discrete jumps.
+
+The EDEM balancer implements \cref{eq:Qs-update,eq:Qd-update} in
+finite-population form. The fractional balancer coefficient $C_{b}$ is
+realised as $\lfloor |C_{b}| \rfloor$ deterministic swaps per epoch
+plus one Bernoulli swap with probability $|C_{b}| - \lfloor |C_{b}|
+\rfloor$; the sign of $C_{b}$ controls direction. A population floor
+prevents the balancer from killing the last agent on either side; the
+1-vs-many state that emerges with strong $|C_{b}|$ is kept as a feature
+of the model rather than papered over (\cref{sec:exp-balancer-sweep}).
+
+\subsection{Bid-acceptance rule (Cond.~2)}
+\label{sec:implementation-cond2}
+
+The original \citet{arbuzov2018de} prose stated the buyer's
+bid-acceptance rule with the strict inequality
+$\beta < \mathrm{mean}(\mathcal{B}_{b})$, while the accompanying
+NetLogo source compared with the opposite sign. Empirically the
+prose-as-written rule causes a runaway price collapse, since it
+selects every sale to clear at the buyer's lowest bid; only the
+NetLogo-as-coded rule reproduces the stable equilibrium reported in
+the original Run~1. We adopt \cref{eq:cond2} (the NetLogo-as-coded
+rule, restated economically) as the canonical Cond.~2 and document
+this discrepancy explicitly in the source. The Mesa implementation
+exposes both rules as a parameter (\texttt{accept\_rule="netlogo"}
+or \texttt{"prose"}) for sensitivity analysis.
+
+\subsection{Determinism, parallelism, and reproducibility}
+\label{sec:implementation-repro}
+
+The Mesa \texttt{Model.rng} is seeded explicitly per run, and all
+agent-side randomness (epsilon draws, heading wiggles, balancer
+Bernoulli) draws from this single stream. Each experiment script in
+\path{python_simulation/experiments/} runs $N \ge 8$ independent seeds
+of the same parameter vector and stacks the per-tick model reporters
+into a single Parquet dataset; figures plot the median across seeds
+plus the 10th--90th percentile band. Pytest unit tests
+(\path{python_simulation/tests/}) cover the rolling market price, both
+Cond.~2 rules, the linear and fractional balancers, the EDEM
+epoch-timing trick, and the $C_{b}$-sign inversion.
+
+\subsection{Per-tick pseudocode}
+\label{sec:implementation-pseudocode}
+
+The complete tick is:
+
+\begin{lstlisting}[language=Python]
+def step(self):  # Model.step
+    self.agents.shuffle_do("step")     # buyers + sellers, randomised
+    self.balancer.step(self)           # DE: every T_B; EDEM: per-epoch
+    self.datacollector.collect(self)
+\end{lstlisting}
+
+\noindent
+where \texttt{Buyer.step} runs \emph{buy + wiggle + move} in NetLogo
+order and \texttt{Seller.step} runs the patience-timer logic
+(timer decrement; on timeout, either drop the highest bid below ask
+and lower the ask, or offer to sign the highest bidder, applying
+\cref{eq:cond2}). The full source is under 600 lines including
+docstrings.

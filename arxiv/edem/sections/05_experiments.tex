@@ -1,0 +1,386 @@
+\section{Experiments and Results}
+\label{sec:experiments}
+
+We report eight controlled experiments grouped into two regimes.
+\Cref{sec:experiments-de} (Runs~1--5) uses the Dynamic Equilibrium
+specialisation of EDEM with linear supply and demand schedules,
+discrete sales, and a rolling-mean clearing price; these isolate the
+effects of estimation noise, patience, agent density, and shocks
+under a textbook population balancer. \Cref{sec:experiments-edem}
+(Runs~6--8) uses the speculative-market EDEM variant with
+multiplicative value updates; these illustrate the bubble, balancer
+sign, and rising-error regimes that the static
+divergence-of-opinion literature cannot reach.
+
+Unless stated otherwise, all runs use a $32 \times 32$ toroidal grid,
+balance period $T_{B} = 100$ ticks, sale window $W = 25$ sales, and
+the bid-acceptance rule \cref{eq:cond2}. Each experiment is replicated
+across at least eight independent seeds; figures plot the median across
+seeds plus the 10th--90th percentile band, with individual seed
+trajectories overlaid faintly. Full parameter tables are in
+\cref{app:params}.
+
+% =====================================================================
+\subsection{Dynamic Equilibrium experiments}
+\label{sec:experiments-de}
+% =====================================================================
+
+\subsubsection{Run 1 -- Stable equilibrium under favourable conditions}
+\label{sec:exp-stable}
+
+We begin from the textbook equilibrium $p^{*} = 100$, $q^{*} = 50$
+defined by $\hat{Q}_{s}(p) = 0.5\,p$ and
+$\hat{Q}_{d}(p) = 100 - 0.5\,p$, with maximum estimation error
+$\bar{\sigma} = 5$ percent, patience drawn uniformly on $[0, 50]$,
+and balance period $T_{B} = 100$. \Cref{fig:run1-stable} shows the
+median market price hovering close to $p^{*}$: across ten seeds and
+20{,}000 ticks, the maximum upward deviation is $+10.7\%$ and the
+maximum downward deviation $-2.4\%$. The companion buyer/seller
+counts oscillate within $\pm 5$ of the equilibrium quantity. The
+slight upward bias of the median trajectory is consistent with
+\citet{arbuzov2018de}'s reported $-4.9\%/+6.2\%$ envelope at
+100{,}000 ticks; we attribute it to the bid-selection asymmetry
+discussed in \cref{sec:framework-de-special}, which the rolling
+average partially absorbs.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig1_stable}
+\caption{Run~1 -- Stable equilibrium with low valuation error and
+moderate patience. Top: market price (median, with 10--90 percentile
+band; faint individual-seed traces). Bottom: agent counts. Dashed
+line: textbook equilibrium price.}
+\label{fig:run1-stable}
+\end{figure}
+
+\subsubsection{Run 2 -- Imprecise valuations cause business cycles}
+\label{sec:exp-cycles}
+
+Holding all other parameters at Run~1 values and increasing
+$\bar{\sigma}$ from $5$ to $25$ percent, the market loses its
+narrow-band stability. \Cref{fig:run2-cycles} shows recurrent
+oscillations of the market price between roughly $+34\%$ and
+$-17\%$ of equilibrium, accompanied by counter-phased oscillations
+of buyer and seller populations: episodes of overbidding draw
+sellers into the market while buyers retreat, after which the
+seller surplus pushes prices back down and the cycle reverses.
+This is a pure consequence of estimation noise --- there are no
+exogenous shocks --- and it suggests that observed business cycles
+in real markets need not require any external driver beyond
+heterogeneous misvaluation, provided the divergence of opinion is
+large relative to the balancer's adjustment speed.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig2_high_error}
+\caption{Run~2 -- Imprecise valuations (\(\bar{\sigma} = 25\%\))
+generate endogenous business cycles. Same conventions as
+\cref{fig:run1-stable}.}
+\label{fig:run2-cycles}
+\end{figure}
+
+\subsubsection{Run 3 -- Patience pushes price above equilibrium}
+\label{sec:exp-patience}
+
+Doubling the maximum seller patience from $50$ to $100$ ticks
+(holding $\bar{\sigma}$ at the Run~1 value of $5\%$) produces a
+durable upward shift in the market price.
+\Cref{fig:run3-patience} shows the median price climbing
+monotonically to roughly $+14\%$ above $p^{*}$ over 20{,}000 ticks
+and showing no sign of reverting. The seller population settles
+at $\sim 57$ (about $+14\%$ of $q^{*}$) and the buyer population
+at $\sim 41$ ($-18\%$). Patience increases sellers' time-on-market
+and thus their willingness to wait for richer bids; the realised
+sale prices tilt up; the rolling average follows.
+\citet{arbuzov2018de} reported a similar
+$+10\%/+10\%/-20\%$ shift, attributing it to seller forbearance
+on stagnating real-estate markets where neither side can quickly
+exit.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig3_patience}
+\caption{Run~3 -- Doubling seller patience to $100$ ticks pushes the
+market price about $14\%$ above the textbook equilibrium and
+sustains it there. Same conventions as \cref{fig:run1-stable}.}
+\label{fig:run3-patience}
+\end{figure}
+
+\subsubsection{Run 4 -- Low agent density pushes price below equilibrium}
+\label{sec:exp-density}
+
+Shifting the demand intercept downward by $50$ units yields a new
+textbook equilibrium $(p^{*}, q^{*}) = (50, 25)$. With only $\sim
+25$ buyers and $\sim 25$ sellers on a $32 \times 32$ grid, encounters
+are sparse: a typical buyer's wiggle-and-step trajectory rarely
+crosses a seller's home before the seller's patience timer expires.
+Sellers therefore lower ask prices repeatedly without receiving
+adequate bids, and the realised sale prices --- and hence the rolling
+market price --- settle \emph{below} the textbook equilibrium.
+\Cref{fig:run4-density} shows a steady drift to roughly $p \approx
+37$, an $18\%$ shortfall, with the seller population shrinking to
+$\sim 19$ and the buyer population growing to $\sim 30$ as the
+balancer chases the depressed price. Patience and density are partial
+substitutes (\cref{sec:bg-dynamics}): both proxy for time-on-market.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig4_low_density}
+\caption{Run~4 -- Halving the demand intercept reduces equilibrium
+quantity to $25$. Sparse encounters cause sellers to lower ask prices
+repeatedly; the realised market price settles about $18\%$ below the
+textbook equilibrium. Same conventions as \cref{fig:run1-stable}.}
+\label{fig:run4-density}
+\end{figure}
+
+\subsubsection{Run 5 -- Shock handling and transitional markets}
+\label{sec:exp-shock}
+
+The previous four runs evolve under fixed parameters. Run~5
+introduces shocks via the
+\texttt{set\_demand}/\texttt{set\_supply} hooks
+(\cref{sec:implementation-pseudocode}) and demonstrates how the model
+absorbs them. \Cref{fig:run5-shock} reports two scenarios.
+
+\paragraph{Scenario A (single shock).} The market begins in the Run~1
+equilibrium. At $t = 3000$ the demand intercept drops to $50$,
+collapsing the textbook equilibrium to $p^{*} = 50$. The realised
+price descends slowly --- it has not finished adjusting by $t = 7000$
+when seller patience is raised to $165$. The combination of a
+lowered demand and elevated patience continues to drive the market
+downward (because the price is still adjusting from the previous
+$p^{*} = 100$), and even by $t = 12000$ the realised price has not
+settled. Doc 2's claim that high patience would lift the price
+\emph{back to} $p^{*} = 50$ presumes a fully-adjusted starting state
+that is not reached within twelve thousand ticks; the figure makes
+visible the more general \citet{arbuzov2018de} observation that
+``adjustment to single shock takes a long time.''
+
+\paragraph{Scenario B (transitional market).} The demand intercept
+toggles between $125$ and $75$ every $2000$ ticks. The textbook
+equilibrium accordingly steps between $p^{*} = 125$ and $p^{*} = 75$,
+but the realised market price never settles at either: each shock
+is absorbed only partially before the next arrives. The figure
+confirms a market \emph{in constant transition from one unknown
+state to another} --- the empirical foothold for
+\cref{sec:framework-schedules}'s claim that supply and demand are
+sample paths of a stochastic process, not deterministic schedules.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig5_shock}
+\caption{Run~5 -- Two shock scenarios. Top: a single demand shock at
+$t = 3000$ followed by a patience boost at $t = 7000$; the market
+absorbs the shock slowly and has not fully adjusted by the end of
+the simulation. Bottom: a transitional market in which the demand
+intercept toggles every $2000$ ticks. The market price never
+converges to either textbook equilibrium. Red dashed verticals mark
+shock events.}
+\label{fig:run5-shock}
+\end{figure}
+
+% =====================================================================
+\subsection{Speculative-market EDEM experiments}
+\label{sec:experiments-edem}
+% =====================================================================
+
+The remaining three runs use the EDEM variant of
+\cref{sec:framework-de-special} with multiplicative value updates
+\cref{eq:value-update}. We track the dimensionless ratio
+$v_{t}(h) / v^{*}(h)$ averaged over all homes; a value of $1$
+indicates fair valuation, values above $1$ indicate the market has
+priced homes above their unobservable fair value.
+
+\subsubsection{Run 6 -- Speculative bubble at $C_{b} = 0$}
+\label{sec:exp-bubble}
+
+With balancer disabled ($C_{b} = 0$) and divergence of opinion
+$\bar{\sigma} = 15\%$, the market exhibits a clean log-linear bubble.
+\Cref{fig:run6-bubble} shows the median value-to-true ratio
+multiplying by $\sim 421\times$ over $3000$ ticks ($150$ epochs),
+with the band tightly enclosing the median: the bubble is
+deterministic in shape and stochastic only in slope. Buyer and
+seller populations are frozen at $20$ each, since $C_{b} = 0$
+admits no balancer adjustment. The mechanism is the bid-selection
+asymmetry of \cref{sec:framework-de-special}: each epoch's average
+winning ratio $\bar{r}_{t}$ is $> 1$ in expectation because winning
+bids are the maxima of multiple noisy draws, and \cref{eq:value-update}
+compounds this multiplicatively over epochs.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig6_bubble}
+\caption{Run~6 -- Speculative bubble at $C_{b} = 0$,
+$\bar{\sigma} = 15\%$. Top: dimensionless market value $v_{t}/v^{*}$
+on a logarithmic axis; the trajectory is approximately linear in
+$\log v$, indicating exponential growth. Bottom: agent populations
+remain at $(20, 20)$.}
+\label{fig:run6-bubble}
+\end{figure}
+
+\subsubsection{Run 7 -- Balancer sign shapes (but cannot eliminate)
+                       the bubble}
+\label{sec:exp-balancer-sweep}
+
+Holding $\bar{\sigma}$ at $15\%$ and varying $C_{b} \in \{+1, 0, -1\}$
+yields three qualitatively distinct trajectories overlaid in
+\cref{fig:run7-balancer-sweep}. The mean-reverting balancer
+($C_{b} = +1$) dampens the bubble most aggressively: the value ratio
+plateaus near $4 \times$ as the seller population grows to roughly
+$40$ and the buyer population shrinks to one. The trend-following
+balancer ($C_{b} = -1$) admits a larger bubble than $+1$, ending
+near $7.7\times$, with mirrored populations (one seller, $\sim 40$
+buyers). The no-balancer case ($C_{b} = 0$) dominates both, ending
+at $\sim 421\times$.
+
+This last observation refines the framing in
+\citet{arbuzov2018edem}, which described the trend-following case
+as the most explosive (the ``Silicon Valley real estate'' or
+``bitcoin'' regime). In the Mesa simulation the most explosive case
+is the no-balancer one: removing one population pole entirely (as
+trend-following does) reduces the multiplicative pressure on each
+remaining seller, because there are simply fewer sellers whose
+values can be inflated. The trend-following case is more aggressive
+than mean-reverting, but neither is as aggressive as no balancer.
+
+The companion finding is that no setting of $C_{b}$ in this
+parameter grid restores $v_{t} / v^{*} = 1$. Bid-selection
+asymmetry introduces a positive bias that even a strong
+mean-reverting balancer cannot fully cancel within the timescales
+considered.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig7_balancer_sweep}
+\caption{Run~7 -- Balancer-coefficient sweep at $\bar{\sigma} = 15\%$.
+Three regimes are overlaid: mean-reverting ($C_{b} = +1$), no
+balancer ($C_{b} = 0$), and trend-following ($C_{b} = -1$). The
+no-balancer case dominates; the trend-following case beats the
+mean-reverting case but is itself bounded above by the no-balancer
+case. Bottom panel shows the population swings induced by each
+balancer.}
+\label{fig:run7-balancer-sweep}
+\end{figure}
+
+\subsubsection{Run 8 -- Trend-following balancer with rising error}
+\label{sec:exp-double-exp}
+
+Doc 2's stylised ``bitcoin'' or ``Silicon Valley'' regime combines
+trend-following ($C_{b} = -1$) with a divergence of opinion that
+itself grows over time, modelling the historical observation that
+late-stage bull markets see widening dispersion in analyst forecasts.
+We initialise $\bar{\sigma}_{0} = 0.05$ (i.e.\ $5\%$) and let
+$\bar{\sigma}_{t+T} = \bar{\sigma}_{t} + 0.005$ each epoch
+(equivalently, $+0.5$ percentage points), so $\bar{\sigma}$ reaches
+$0.80$ ($80\%$) by the end of the run.
+\Cref{fig:run8-double-exp} shows the resulting trajectory: the
+value ratio climbs to $\sim 30 \times$ over $3000$ ticks. The
+trajectory is super-linear in linear time but visibly concave-down
+in log-time, indicating sustained exponential rather than
+double-exponential growth at this parameter setting; we conjecture
+that genuine double-exponential acceleration would emerge for
+larger $\bar{\sigma}$ growth rates than we explore here. The
+population panel mirrors Run~7's $C_{b} = -1$ behaviour: sellers
+drained to one, buyers saturated at $\sim 44$.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig8_double_exp}
+\caption{Run~8 -- Trend-following balancer ($C_{b} = -1$) combined
+with linearly-growing divergence of opinion
+($\bar{\sigma}: 5 \to 80$). Top panel: market value on a log scale.
+Middle: agent populations. Bottom: $\bar{\sigma}$ over time. The
+trajectory is sustained exponential rather than visibly
+double-exponential.}
+\label{fig:run8-double-exp}
+\end{figure}
+
+\subsubsection{Run 9 -- Sensitivity grid}
+\label{sec:exp-sensitivity}
+
+The eight runs reported above each fix a single parameter vector. To
+rule out the possibility that the order-statistic drift of
+\cref{sec:framework-asymmetry} is an artefact of one well-chosen
+calibration, we sweep $C_{b}$ and $\bar{\sigma}$ over a $5 \times 6$
+grid (\(C_{b} \in \{-1, -0.5, 0, +0.5, +1\}\),
+$\bar{\sigma} \in \{5, 10, 15, 20, 25, 30\}\%$), running five seeds per
+cell for $1500$ ticks. \Cref{fig:run9-sensitivity} reports the
+median terminal $v_{t}/v^{*}$ across seeds, on a $\log_{10}$ colour
+scale.
+
+Three observations stand out:
+
+\begin{enumerate}[leftmargin=*,nosep]
+\item \textbf{The drift is universal in this range.} Every cell of the
+grid has $v_{t}/v^{*} > 1$, and 100\% of cells exceed
+$1.5 \times$. The order-statistic mechanism is not a corner-case.
+\item \textbf{Bubble territory is large.} 43\% of cells exceed
+$10 \times$ within $1500$ ticks; growth at $\bar{\sigma} = 30\%$
+reaches $235 \times$ in the no-balancer column.
+\item \textbf{$C_{b} = 0$ dominates within each $\bar{\sigma}$ column.}
+This confirms the Run~7 finding (\cref{sec:exp-balancer-sweep}) at
+five distinct $\bar{\sigma}$ values: removing the balancer is more
+explosive than either mean-reverting or trend-following balancers,
+across the whole grid.
+\end{enumerate}
+
+The grid does not constitute a closed-form proof that the drift
+survives \emph{all} parameter regimes; in particular, very large
+$|C_{b}|$ values that drain one side of the population to a single
+agent within a few epochs may behave differently. Section
+\ref{sec:disc-balancer} discusses the limits of the linear-balancer
+intervention more carefully.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig9_sensitivity}
+\caption{Run~9 -- Sensitivity grid: median terminal $v_{t}/v^{*}$
+over a $5 \times 6$ sweep of balancer coefficient $C_{b}$ versus
+divergence of opinion $\bar{\sigma}$, with 5 seeds per cell at
+$t = 1500$. Colour: $\log_{10}$ of the cell median; cell text:
+linear value. Red squares mark the cells corresponding to Runs~6
+and~7 ($C_{b} \in \{-1, 0, +1\}$ at $\bar{\sigma} = 15\%$). The
+order-statistic drift produces $v_{t}/v^{*} > 1$ in every cell.}
+\label{fig:run9-sensitivity}
+\end{figure}
+
+% =====================================================================
+\subsection{Summary across runs}
+\label{sec:exp-summary}
+% =====================================================================
+
+\Cref{tab:experiment-summary} consolidates the end-of-run statistics.
+The eight runs sweep three parameter axes: estimation noise
+($\bar{\sigma}$), seller patience, and agent density (Runs 1--4); a
+shock schedule (Run~5); and the EDEM balancer parameter $C_{b}$ with
+a fixed or growing $\bar{\sigma}$ (Runs 6--8). Together they delineate
+six qualitatively distinct steady-state regimes -- band-stable,
+business-cycle, persistent overshoot, persistent undershoot, runaway
+exponential, and constant transition -- all reachable from the same
+underlying agent ruleset.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Eight EDEM runs: parameters and observed outcomes
+at the end of each simulation. Median across $\ge 8$ seeds.
+DE runs report median deviation of the rolling market price from the
+textbook equilibrium; EDEM runs report the dimensionless
+$v_{t}/v^{*}$ ratio.}
+\label{tab:experiment-summary}
+\begin{tabular}{l l l l}
+\toprule
+\textbf{Run} & \textbf{Manipulated parameter} & \textbf{Outcome metric} & \textbf{Regime} \\
+\midrule
+1 & $\bar{\sigma} = 5\%$, patience $\le 50$       & $-2\%$ to $+11\%$ band       & band-stable        \\
+2 & $\bar{\sigma} = 25\%$                         & $-17\%$ to $+34\%$, periodic & business-cycle     \\
+3 & patience $\le 100$                            & $+14\%$ persistent           & overshoot          \\
+4 & demand intercept $-50$                        & $-18\%$ persistent           & undershoot         \\
+5 & shock at $t=3000$, then re-shocks             & price chases moving target   & transitional       \\
+\midrule
+6 & EDEM, $C_{b} = 0$, $\bar{\sigma}=15\%$        & $v_{t}/v^{*} = 421\times$    & runaway bubble     \\
+7 & EDEM, $C_{b} \in \{-1, 0, +1\}$               & $\{7.7, 421, 4.2\}\times$    & balancer-shaped    \\
+8 & EDEM, $C_{b} = -1$, $\bar{\sigma}: 5\to80$    & $v_{t}/v^{*} = 30\times$     & sustained super-linear \\
+\bottomrule
+\end{tabular}
+\end{table}

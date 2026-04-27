@@ -1,0 +1,26 @@
+% Abstract — leads with the order-statistic mechanism
+
+We present the \emph{Estimated Dynamic Equilibrium Model} (EDEM), an
+agent-based framework in which supply and demand are realisations of
+a coupled stochastic process driven by heterogeneous, error-prone
+agent valuations. The framework's central technical contribution is
+a generative mechanism for persistent disequilibrium: when
+market-clearing prices are repeatedly selected from the upper tail
+of noisy bid distributions and fed back into future valuations,
+expected prices drift upward even with strictly zero-mean estimation
+errors. We derive the bias in closed form for a clean special case
+($\sigma(n-1)/(n+1)$ for $n$ iid uniform bids) and show via
+simulation that compounding the bias across epochs produces
+exponential price growth without any behavioural assumption about
+investor optimism. EDEM extends \citet{miller1977}'s
+divergence-of-opinion theory to a fully dynamic setting and recovers
+Walrasian equilibrium and Miller's static premium as limiting cases.
+Eight controlled experiments in the Python ABM framework Mesa, on a
+$32 \times 32$ real-estate neighbourhood, demonstrate six
+qualitatively distinct regimes --- band-stable, business-cycle,
+persistent overshoot, persistent undershoot, runaway bubble, and
+constant transition --- all reachable from the same agent ruleset.
+Implications for the empirical divergence-of-opinion literature
+(which has produced contradictory findings) and for machine-learning
+valuation algorithms (which inherit and amplify the order-statistic
+bias) are discussed.

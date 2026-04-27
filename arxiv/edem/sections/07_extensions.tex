@@ -1,0 +1,101 @@
+\section{Extensions and Future Work}
+\label{sec:extensions}
+
+The framework of \cref{sec:framework} is deliberately minimal so that
+extensions can be plugged in without rewriting the agent skeleton. Five
+directions appear especially fruitful and we sketch each below.
+
+\subsection{Bias-corrected clearing}
+\label{sec:ext-clearing}
+
+\Cref{sec:disc-balancer} argued that the bid-selection asymmetry
+embedded in the max-bid clearing rule cannot be cancelled by any
+linear balancer. Two replacements for the clearing functional $A$
+in \cref{eq:price-functional} would address it directly:
+
+\begin{itemize}[leftmargin=*,nosep]
+\item \textbf{Winsorised mean}: replace $\bar{r}_{t}$ in
+      \cref{eq:value-update} with a 10\% winsorised mean of the yellow
+      buyers' winning ratios. This caps the influence of extreme
+      single-epoch outliers without changing the agent rule set.
+\item \textbf{Selection-aware estimator}: substitute the median or a
+      lower-percentile statistic of all bids (not only winning bids)
+      for $\bar{r}_{t}$. This estimates the underlying value
+      distribution rather than the maximum-order statistic.
+\end{itemize}
+
+Both modifications are one-line edits to \texttt{EDEMModel.\_end\_epoch}
+in our reference implementation. We expect either to break the
+exponential bubble of Run~6 entirely while leaving the disequilibrium
+regimes of Runs 2--5 qualitatively intact, since those derive from
+schedule dynamics rather than from clearing asymmetry.
+
+\subsection{Realtors and commission structures}
+\label{sec:ext-realtors}
+
+The DE seller is a strict utility-maximiser whose only friction is
+patience. Real-world residential transactions are intermediated by
+realtors whose payoff is a fraction of the sale price; this ties
+realtor incentives to seller incentives but injects an additional
+clock (the listing agreement) and a different bargaining geometry
+(realtors negotiate on behalf of multiple sellers in parallel). A
+realtor extension would replace the seller agent with an aggregated
+listing agent whose patience and ask-price strategies optimise
+expected commission across a portfolio. This is a natural setting
+for empirical calibration: realtor commission rates and listing
+durations are publicly observable, unlike the patience parameter of
+the bare DE seller.
+
+\subsection{Open vs.\ blind auctions}
+\label{sec:ext-auctions}
+
+EDEM as posed is a blind-bid model: a buyer's bid does not depend on
+other buyers' bids on the same home. Open-bid auctions
+(``best-and-final'' rounds, escalation clauses) substantially change
+the bid distribution by exposing buyers to one another's valuations.
+The likely effect is to amplify the bid-selection asymmetry in
+\cref{sec:framework-de-special}, because each buyer can revise upward
+in response to seeing competitors. Conversely, a sealed-bid auction
+with full information disclosure post-clearing would let buyers
+calibrate over time and could reduce the asymmetry. Both regimes
+are minor modifications to the buyer agent's bid procedure.
+
+\subsection{Construction and the supply side}
+\label{sec:ext-construction}
+
+The construction-market variant invertes the EDEM agent roles:
+\emph{contractors} bid downward to win projects, with the
+lowest-bid contractor winning. The selection asymmetry then operates
+in reverse, biasing realised contract prices below the population
+fair value, and the dynamics of contractor entry / exit are governed
+by an asymmetric balancer (a contractor exits after sustained losses,
+a homeowner does not exit a partially-built project lightly). This
+is a one-class extension that captures the historically high
+bankruptcy rates of small construction companies as a stable
+emergent feature rather than as an exogenous shock.
+
+\subsection{Adaptive agents}
+\label{sec:ext-adaptive}
+
+EDEM agents are non-learning. Two adaptive extensions are obvious:
+
+\begin{itemize}[leftmargin=*,nosep]
+\item \textbf{Bayesian estimation.} Each agent maintains a posterior
+      over the home's fair value and updates it after every observed
+      sale. This converges, in the limit, toward the bias-corrected
+      regime sketched in \cref{sec:ext-clearing}, since the agent
+      learns the selection structure of observed prices.
+\item \textbf{Reinforcement-learning bidders.} Each agent is a
+      policy mapping local state (price level, time on market,
+      recent sales) to bids. With a buy-low/sell-high reward
+      structure, RL agents would in principle discover the
+      bid-selection asymmetry and exploit it; this would be a
+      computational analogue to the Zillow-Offers iBuying problem
+      \citep{zillow2021ibuying} and would offer a stress test of any
+      proposed fix in \cref{sec:ext-clearing}.
+\end{itemize}
+
+We have implemented none of these in the present codebase but each
+is a self-contained extension on top of the existing
+\texttt{Buyer}/\texttt{Seller} classes; pull requests are welcomed at
+the project repository.

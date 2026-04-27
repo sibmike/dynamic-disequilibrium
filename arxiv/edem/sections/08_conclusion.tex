@@ -1,0 +1,53 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We have presented EDEM, an agent-based framework that models supply
+and demand as the realisation of a coupled stochastic process driven
+by heterogeneous, error-prone agent valuations. The framework
+recovers the classical Walrasian fixed point and a Miller-style
+static premium mechanism as limiting cases, and admits a family of
+out-of-equilibrium regimes -- band-stable, business-cycle, persistent
+overshoot, persistent undershoot, runaway bubble, and constant
+transition -- that are reachable from the same agent ruleset by
+varying three parameters: the divergence-of-opinion scale
+$\bar{\sigma}$, the seller patience timer, and the population
+balancer coefficient $C_{b}$.
+
+The eight-experiment Mesa replication of \cref{sec:experiments}
+supports three substantive empirical claims. First,
+\emph{textbook supply-and-demand schedules omit a state variable}:
+seller patience and agent density both shift the realised market
+price away from the equilibrium predicted by linear schedules, and
+in opposite directions, while preserving the schedules themselves.
+Second, \emph{bubbles do not require behavioural bias}; an unbiased
+estimator combined with a max-bid clearing rule produces the same
+multiplicative drift that observers attribute to investor optimism.
+Third, \emph{linear balancer interventions cannot eliminate the
+drift}: in the parameter range we explored, no setting of $C_{b}$
+restores the textbook valuation, because the asymmetry is structural
+to the bidding mechanism.
+
+An immediate corollary is for valuation algorithms. A
+machine-learning estimator trained on historical sale prices is
+fitting an upper-order statistic of plausible sale prices, not their
+mean; deployed at scale, it functions as a positively-biased
+estimator that may provide the market with a coordinating signal
+amplifying the very bubble it was meant to price. We do not advance
+this as a complete account of any specific historical episode (see
+\cref{sec:disc-ml}). The robust theoretical recommendation is that
+clearing-price-anchored valuations be replaced with selection-aware
+procedures (median rather than mean of plausible sale prices, or
+censored-data likelihoods that account for the offer-acceptance
+threshold) before being used as deployment-time point estimators.
+
+EDEM's framework is intentionally general: the eight experiments
+herein use a real-estate parameterisation, but the divergence of
+opinion premium they explain has been documented across asset
+classes, including initial public offerings
+\citep{miller1977,doukas2006} and cryptocurrency markets. The Mesa
+implementation is open-source and the eight experiments reproduce
+to bit-equivalent figures from a single \texttt{pytest}-and-script
+invocation; we hope this lowers the barrier to extending the
+framework toward leveraged markets, adaptive agents, and
+empirically-calibrated parameter sweeps that the present
+exposition leaves for future work.

@@ -1,0 +1,148 @@
+\section{Discussion}
+\label{sec:discussion}
+
+The eight experiments together support three substantive claims about
+how real markets generate the price patterns that empirical research
+has found contradictory.
+
+\subsection{Time-on-market is the missing third dimension}
+\label{sec:disc-tom}
+
+Runs~3 and~4 show that two distinct manipulations --- raising seller
+patience and lowering agent density --- both produce stable
+deviations from the textbook equilibrium price. Their effect signs
+are opposite (Run~3 overshoots, Run~4 undershoots), but their
+mechanism is the same: both alter the typical \emph{time on market}
+of an unsold home. Patience increases the upper bound on time on
+market directly; density increases it indirectly by decreasing
+encounter rates per unit time. In each case the mismatch between the
+balancer's price-to-quantity correction and the underlying microstructural
+adjustment shows up as a persistent equilibrium offset.
+
+This suggests that the textbook supply-and-demand pair $\hat{Q}_{s}(p)$
+and $\hat{Q}_{d}(p)$ omits a state variable. A more accurate
+characterisation would be $\hat{Q}_{s}(p, \tau)$ and
+$\hat{Q}_{d}(p, \tau)$ where $\tau$ is expected time on market.
+Empirically, real-estate datasets that include days-on-market
+information vastly outperform those that do not for short-run
+forecasting; our model offers a generative explanation for that
+finding.
+
+\subsection{Bid-selection asymmetry, not estimation bias, drives bubbles}
+\label{sec:disc-bias}
+
+The estimation function \cref{eq:estimation} has zero mean error: an
+agent's expected valuation is exactly the home's current value. Yet
+the EDEM speculative regime (Runs 6--8) produces unbounded upward
+drift even with this unbiased estimator. The mechanism is not
+behavioural bias but a statistical asymmetry: each seller selects the
+\emph{maximum} bid received, and the maximum of $N$ noisy estimates
+of a fair value is, in expectation, larger than the fair value
+itself. \cref{eq:value-update} compounds this asymmetry
+multiplicatively across epochs.
+
+This refines the standard ``divergence of opinion'' story.
+\citet{miller1977}'s static premium emerges from constrained supply:
+the $N$ shares are sold to the $N$ most optimistic of $K > N$
+investors. EDEM's dynamic premium emerges from \emph{repeated}
+constrained supply: each epoch's winners feed back into the next
+epoch's anchor value. The static premium is a corner of the dynamic
+premium, recovered when the feedback loop is severed.
+
+A practical implication is that empirical premium-vs-discount
+findings depend strongly on the sample's position along this
+feedback trajectory, which short-window studies cannot identify.
+Two studies that find opposite signs may both be correct
+characterisations of distinct epochs in the same underlying process.
+
+\subsection{Mean-reverting balancers cannot fully cancel the asymmetry}
+\label{sec:disc-balancer}
+
+Run~7's three-way comparison shows that no setting of the EDEM
+balancer coefficient $C_{b}$ within the parameter grid we examined
+restores $v_{t}/v^{*} = 1$. The mean-reverting case ($C_{b} = +1$)
+plateaus near $4 \times$; the trend-following case ($C_{b} = -1$)
+continues drifting upward; the no-balancer case dominates both. A
+crucial corollary is that \emph{policy interventions cast as
+balancer adjustments will not, by themselves, prevent persistent
+mispricing.} The asymmetry is structural to the bidding mechanism;
+to neutralise it, an intervention would have to change either the
+selection rule (e.g., uniform random matching instead of max-bid) or
+the per-epoch update rule (e.g., a winsorised mean instead of the
+arithmetic mean). \cref{sec:extensions} sketches both alternatives.
+
+The companion observation --- that the no-balancer case dominates
+the trend-following case in our simulation --- refines the framing
+in \citet{arbuzov2018edem}, which described the trend-following
+``Silicon Valley real estate'' regime as the most explosive. That
+framing turns out to overstate the role of the balancer's sign
+relative to its presence. We attribute the discrepancy to the
+agent-pool depletion that strong $|C_{b}|$ induces: trend-following
+removes sellers, but the remaining sellers are all that the
+multiplicative update rule can act on.
+
+\subsection{Implications for valuation algorithms}
+\label{sec:disc-ml}
+
+The same mechanism that drives EDEM's exponential bubble in Run~6
+operates in any pricing system whose inputs are anchored to recent
+market-clearing prices. A machine-learning real-estate valuation
+algorithm trained on historical sale prices estimates not the home's
+fair value but the typical winning bid for a similar home --- which
+is, by construction, the maximum of the relevant noisy estimates,
+and therefore systematically above the fair value. Deploying such an
+algorithm at scale risks providing the market with a coordinating
+signal that pulls realised winning bids upward, which then feeds
+back into the next training cycle.
+
+We do not advance EDEM as an explanation for any specific real-world
+mispricing event. The 2021 wind-down of Zillow's algorithmic-iBuying
+programme \citep{zillow2021ibuying} is one episode in which a
+historical-sale-price-anchored valuation system at scale incurred
+substantial losses; the public record is consistent with EDEM's
+order-statistic prediction but is also consistent with several other
+explanations (timing of housing-market regime changes, operational
+mispricing, capital-allocation constraints), and we have not
+attempted to discriminate between them. The robust theoretical
+finding is more modest: an unbiased ML valuation trained on
+historical clearing prices is, by construction, fitting the
+upper-order statistic rather than the population mean of plausible
+sale prices, and at deployment time it functions as a
+positively-biased estimator. A defensible deployment would correct
+for this --- for example by predicting the median rather than the
+mean of plausible sale prices, or by using a censored-data
+likelihood that accounts for the offer-acceptance threshold ---
+rather than treating the historical record as a clean training
+target.
+
+\subsection{Limitations}
+\label{sec:disc-limits}
+
+Several modelling choices restrict the scope of the findings.
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Single asset class.} EDEM models a single class of
+      indistinguishable homes; portfolio-level effects (cross-asset
+      hedging, sector rotation) are absent.
+\item \textbf{No leverage.} Buyers carry no debt and sellers no
+      mortgages; financialised real-estate markets that exhibited the
+      most dramatic anomalies of the past two decades require leverage
+      to model accurately \citep{geanakoplos2012leverage,baptista2016boe}.
+\item \textbf{No macroeconomic environment.} The supply and demand
+      schedules in \cref{eq:Qs-update,eq:Qd-update} respond only to
+      price; they do not respond to interest-rate shocks, employment,
+      or migration.
+\item \textbf{Adaptive vs.\ static estimators.} Agents do not learn
+      from sale outcomes. A learning extension --- Bayesian belief
+      updating, or reinforcement-learning bidding --- would either
+      converge toward bias-corrected estimation (closing the
+      bubble channel) or amplify it (opening a stronger one),
+      depending on how counterfactual observations are weighted.
+\item \textbf{Run~5 timing.} The 12{,}000-tick budget for the single-
+      shock scenario is too short for the market to reach its
+      post-shock floor before the patience boost fires. Doc~2's
+      specific claim that patience returns the price to the new
+      textbook equilibrium would require a longer simulation.
+      The figure as published makes the more general slow-adjustment
+      claim that \cref{sec:bg-dynamics} actually requires.
+\end{itemize}

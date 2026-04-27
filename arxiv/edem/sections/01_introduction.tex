@@ -1,0 +1,99 @@
+\section{Introduction}
+\label{sec:intro}
+
+\epigraph{Beauty is the first test: there is no permanent place in the world
+for ugly mathematics.}{---G.~H.~Hardy, \emph{A Mathematician's Apology} (1940)}
+
+The Efficient Market Hypothesis (EMH) remains the dominant theory of
+price formation. It predicts when prices reflect available information
+but does not provide a generative microstructural account of when and
+why they fail to: bubbles, crashes, persistent cross-sectional return
+anomalies, and the stylised observation that real markets very rarely
+sit at the textbook supply--demand fixed point. Decades of empirical
+work have produced rival theories whose claims often contradict one
+another, because abundant and noisy financial data can be mined to
+support nearly any hypothesis \citep{moffitt2017}. To avoid
+contributing yet another empirical controversy, this paper takes the
+less travelled \emph{atheoretical} route: constructing an economy from
+the ground up in a controlled environment and asking what behaviour
+emerges from a small number of common-sense rules.
+
+The central technical claim of the paper is that two structural
+features --- max-bid clearing and per-epoch feedback of clearing
+prices into agent valuations --- generate persistent positive drift
+in realised market prices even when individual agents' estimation
+errors are exactly zero-mean. The mechanism is order-statistic bias:
+each seller selects the maximum of multiple noisy bids, and the
+maximum of $n$ zero-mean draws is, in expectation, strictly above
+their mean. Feeding the realised maximum back into the next round's
+anchor compounds the bias multiplicatively. No behavioural assumption
+about investor optimism, risk aversion, or attention is required.
+Bubbles, business cycles, persistent overshoots, and persistent
+undershoots all follow from this single mechanism interacting with
+heterogeneous time-on-market dynamics.
+
+We use agent-based modelling \citep{wilensky1999} because it allows
+this kind of structural mechanism to emerge from a few simple,
+transparent rules. The setting is a real-estate market in a small
+neighbourhood --- a market in which every participant must form a
+personal estimate of an asset whose true value is fundamentally
+uncertain. Real estate is a useful laboratory: prices are observable,
+transactions are costly enough that na\"ive arbitrage arguments fail,
+and divergence of opinion among buyers and sellers is the rule
+rather than the exception.
+
+The central object of study is the \emph{Estimated Dynamic Equilibrium
+Model} (EDEM), in which supply and demand are not static schedules
+but realisations of a stochastic process driven by heterogeneous,
+error-prone agent valuations. EDEM is a dynamic extension of
+\citet{miller1977}'s divergence-of-opinion theory, but it relaxes
+Miller's static one-shot setting to allow valuations, the price
+level, and the population of buyers and sellers to co-evolve over
+time.
+
+The paper makes three contributions:
+\begin{enumerate}
+\item \textbf{An order-statistic mechanism for bubbles without
+biased agents} (\cref{sec:framework-asymmetry}): we derive in closed
+form, for a clean special case, that the expected winning bid
+exceeds the home value by $\sigma(n-1)/(n+1)$ when $n$ bidders
+draw zero-mean errors with dispersion $\sigma$. Compounded across
+epochs, this produces the exponential price drift of
+\cref{sec:exp-bubble}.
+
+\item \textbf{A unified framework} (\cref{sec:framework}) that nests
+the classical Walrasian equilibrium and Miller's static premium as
+limiting cases, and admits a family of out-of-equilibrium regimes
+(business cycles, persistent overshoots and undershoots, bubbles,
+constant transition) parameterised by estimation noise, balancer
+strength, and time-on-market.
+
+\item \textbf{Eight controlled experiments}
+(\cref{sec:experiments}) implemented in the Python ABM framework
+Mesa \citep{masad2015mesa}, replacing earlier
+\citet{wilensky1999} NetLogo prototypes. The Mesa codebase is open
+source and reproduces every figure in the paper from a clean
+checkout.
+\end{enumerate}
+
+A practical implication is that empirical premium-vs-discount
+findings depend strongly on the sample's position along the
+underlying stochastic trajectory, which short-window studies cannot
+identify. Two studies that find opposite signs may both be correct
+characterisations of distinct epochs in the same process. A
+secondary implication concerns valuation algorithms: a
+machine-learning estimator trained on historical clearing prices
+inherits the bid-selection asymmetry and re-deploys it as a
+positively-biased point estimator, providing the market with a
+coordinating signal that can amplify the very bubble the algorithm
+was meant to price. \Cref{sec:disc-ml} discusses this in connection
+with the 2021 wind-down of Zillow Offers \citep{zillow2021ibuying}.
+
+The remainder of the paper is organised as follows. \Cref{sec:background}
+reviews \citet{miller1977} and the divergence-of-opinion debate.
+\Cref{sec:framework} presents the EDEM framework formally and derives
+the order-statistic drift. \Cref{sec:implementation} describes the
+Mesa implementation. \Cref{sec:experiments} reports the eight
+experiments and their results. \Cref{sec:discussion} discusses
+implications. \Cref{sec:extensions} sketches extensions and
+\cref{sec:conclusion} concludes.

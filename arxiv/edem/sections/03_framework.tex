@@ -1,0 +1,310 @@
+\section{The EDEM Framework}
+\label{sec:framework}
+
+This section formalises the Estimated Dynamic Equilibrium Model. We
+state EDEM in its general form, then identify the Dynamic Equilibrium
+(DE) model of \cref{sec:experiments-de} and Walrasian equilibrium as
+limiting cases. The central technical claim is that two structural
+features --- max-bid clearing and per-epoch feedback of clearing
+prices into agent valuations --- generate persistent positive drift
+in realised prices even when individual agents' estimation errors are
+zero-mean. \Cref{sec:framework-asymmetry} derives this drift in a
+clean order-statistic form.
+
+\subsection{Primitive objects}
+\label{sec:framework-primitives}
+
+A market is staged on a finite torus $G$ of homes; each home
+$h \in G$ has a fixed but unobservable \emph{fair value} $v^{*}(h)$ and
+a \emph{market value} $v_{t}(h) \in \mathbb{R}_{>0}$ that evolves over
+discrete time $t = 0, 1, 2, \dots$. The market is populated by two
+agent classes:
+\begin{itemize}[leftmargin=*]
+\item \textbf{Sellers} $\mathcal{S}_{t} \subset G$, each occupying one
+      home and posting an ask price $a_{t}(s)$;
+\item \textbf{Buyers} $\mathcal{B}_{t}$, each free to walk the torus
+      and place bids on sellers it lands with.
+\end{itemize}
+We let $Q_{s}(t) = |\mathcal{S}_{t}|$ and $Q_{d}(t) = |\mathcal{B}_{t}|$
+denote the supply and demand quantities at time $t$; both are
+state variables, not parameters.
+
+\subsection{Heterogeneous estimation}
+\label{sec:framework-estimation}
+
+Each agent is endowed with a personal \emph{estimation function}.
+For an agent $i$ valuing home $h$ at time $t$:
+\begin{equation}
+\label{eq:estimation}
+E_{i,t}(h) \;=\; v_{t}(h) \cdot \bigl(1 + \varepsilon_{i,t}\bigr),
+\qquad
+\varepsilon_{i,t} \sim F_{i}(\sigma_{i}),
+\end{equation}
+where $F_{i}$ is a zero-mean error distribution with agent-specific
+dispersion $\sigma_{i}$. Concretely, $\mathbb{E}[\varepsilon_{i,t}] = 0$
+and $\operatorname{Var}(\varepsilon_{i,t})$ is increasing in
+$\sigma_{i}$. The DE specialisation
+(\cref{sec:framework-de-special}) takes $F_{i}$ as the symmetric
+uniform $\mathcal{U}[-\sigma_{i},\,+\sigma_{i}]$; in the broader
+EDEM the error distribution is left unspecified beyond zero-mean and
+the support condition $\Pr(\varepsilon_{i,t} > -1) = 1$ that keeps
+\cref{eq:estimation} strictly positive.
+
+\paragraph{Unit convention.} Throughout the formal model,
+$\sigma_{i}$ is a dimensionless dispersion parameter expressed as a
+\emph{decimal}; e.g.\ $\sigma_{i} = 0.05$ corresponds to a $\pm 5\%$
+maximum estimation error. The parameter tables and figure captions
+report $\sigma$ as a percentage for readability; the conversion is
+implicit when these values appear in \cref{eq:estimation} and its
+descendants.
+
+The dispersion parameter $\sigma_{i}$ is the \emph{divergence of
+opinion} that \citet{miller1977} treats statically. Allowing
+$\sigma_{i}$ to vary across agents (estimation heterogeneity) and over
+time (rising or falling market-wide divergence of opinion) is the key
+generalisation that makes EDEM a dynamic theory of price formation.
+
+\subsection{Per-tick interaction}
+\label{sec:framework-interaction}
+
+At each tick:
+\begin{enumerate}[leftmargin=*,nosep]
+\item Buyers move and post bids: a buyer $b$ that lands on a seller
+      $s$'s home draws a bid $\beta_{b,s}^{(t)} = E_{b,t}(h(s))$ from
+      \cref{eq:estimation} and presents it to $s$. Bids accumulate;
+      the seller tracks the best bid received.
+\item Sellers process bids: when its patience timer elapses, $s$
+      offers to sign with the buyer holding the best bid. The buyer
+      either commits (a sale clears) or declines (the bid is
+      dropped); the commitment rule is the key behavioural primitive
+      and is discussed below in \cref{sec:framework-cond2}.
+\end{enumerate}
+
+\subsection{Market-clearing functional}
+\label{sec:framework-clearing}
+
+The realised market price at time $t$ is the output of a clearing
+algorithm $A$ that consumes the full market state. Let
+\begin{equation}
+\label{eq:state}
+X_{t} \;=\;
+\bigl(\mathcal{S}_{t},\,\mathcal{B}_{t},\,
+       \{v_{t}(h)\}_{h \in G},\,
+       \{\beta_{\bullet}^{(t)}\},\,
+       \{a_{t}(s)\}_{s \in \mathcal{S}_{t}},\,
+       \{\text{patience}_{t}(s)\},\,
+       \mathcal{H}_{t}\bigr)
+\end{equation}
+denote the model's state at $t$ (agent populations, home values,
+outstanding bids and asks, seller patience timers, and the history
+$\mathcal{H}_{t}$ of completed sales). The realised market price is
+\begin{equation}
+\label{eq:price-functional}
+p_{t} \;=\; A(X_{t};\,\theta),
+\end{equation}
+where $\theta$ collects structural parameters. The reduced state
+variables $Q_{s}(t)$, $Q_{d}(t)$, and a cross-population dispersion
+summary $\sigma$ are the principal --- but not the only --- quantities
+that $A$ depends on; we use the abbreviated notation
+$A(Q_{s}(t), Q_{d}(t), \sigma)$ when the remaining state is held
+implicit. In our two specific instantiations $A$ is realised
+differently:
+\begin{itemize}[leftmargin=*,nosep]
+\item In DE, $A$ is the rolling average of the last $W$ \emph{sale
+      events} (\cref{eq:price-rolling}). Sales are discrete events
+      and not every tick records one.
+\item In the speculative-market EDEM variant, $A$ is implicit in the
+      multiplicative update rule \cref{eq:value-update}; sales are
+      not realised, and the market price is the average home value.
+\end{itemize}
+
+\subsection{Stochastic supply and demand schedules}
+\label{sec:framework-schedules}
+
+Crucially, $Q_{s}$ and $Q_{d}$ in \cref{eq:price-functional} are not
+the deterministic schedules $Q_{s}(p)$ and $Q_{d}(p)$ of textbook
+microeconomics. They are integer-valued random walks driven by the
+price increment $\Delta p_{t-1} = p_{t-1} - p_{t-2}$ via two balancer
+parameters $C_{b}, C_{s}$:
+\begin{align}
+\label{eq:Qs-update}
+Q_{s}(t) &= Q_{s}(t-1) + Z^{s}_{t},
+& \mathbb{E}\bigl[Z^{s}_{t}\bigr] &= C_{b}\,\operatorname{sgn}(\Delta p_{t-1}), \\
+\label{eq:Qd-update}
+Q_{d}(t) &= Q_{d}(t-1) - Z^{d}_{t},
+& \mathbb{E}\bigl[Z^{d}_{t}\bigr] &= C_{s}\,\operatorname{sgn}(\Delta p_{t-1}).
+\end{align}
+The integer increments $Z^{s}_{t}, Z^{d}_{t}$ are required because
+agent counts are integers; they realise possibly non-integer expected
+counts via the deterministic-plus-Bernoulli rule of
+\cref{sec:implementation-balancer}, with a population floor of one
+agent per side. With $C_{b}, C_{s} > 0$ rising prices add sellers
+and remove buyers (mean-reverting); with $C_{b}, C_{s} < 0$ rising
+prices add buyers and remove sellers (trend-following); with
+$C_{b} = C_{s} = 0$ the populations are frozen and the price evolves
+under the bid-selection asymmetry alone. The simulations in
+\cref{sec:experiments-edem} use $C_{s} = C_{b}$ and report the
+single number $C_{b}$.
+
+Together,
+\cref{eq:estimation,eq:price-functional,eq:Qs-update,eq:Qd-update}
+define a coupled stochastic process whose realisation is a sample
+path. Equilibrium in the textbook sense corresponds to the steady
+state $\Delta p_{t} = \Delta Q_{s}(t) = \Delta Q_{d}(t) = 0$ --- a
+non-generic state that the process visits only fleetingly under most
+parameter regimes, which is the central observation of the paper.
+
+\subsection{Bid commitment (Cond.~2)}
+\label{sec:framework-cond2}
+
+A buyer $b$ offered to sign at price $\beta$ commits iff $\beta$ is
+at or above the buyer's own running benchmark over its outstanding
+bids:
+\begin{equation}
+\label{eq:cond2}
+b \text{ commits} \quad\Longleftrightarrow\quad \beta \;\ge\; \frac{1}{|\mathcal{B}_{b}|}\sum_{\beta' \in \mathcal{B}_{b}} \beta',
+\end{equation}
+where $\mathcal{B}_{b}$ is the set of all bids $b$ has currently
+outstanding (the offered $\beta$ included, so $|\mathcal{B}_{b}| \ge 1$
+always). The intuition is order-statistic selection on the buyer's
+side: each $\beta' \in \mathcal{B}_{b}$ is a noisy estimate of fair
+value, and the bids $b$ has placed on different sellers reflect
+different draws of $b$'s estimation error. Committing only when the
+offered $\beta$ is at or above the buyer's running benchmark
+restricts $b$'s actual purchase to the upper tail of its own bid
+distribution --- the homes for which $b$'s estimate happened to
+land on the optimistic side. This is the buyer-side mirror of the
+seller-side max-bid selection of \cref{sec:framework-asymmetry}, and
+it is the second of the two ingredients that produces the order-
+statistic drift. The prior write-up of the model in
+\citet{arbuzov2018de} stated this rule with the inequality reversed;
+we restore the version that matches the simulation results actually
+reported there (\cref{sec:implementation-cond2}).
+
+\subsection{The order-statistic drift: an analytical aside}
+\label{sec:framework-asymmetry}
+
+The bubble mechanism that Runs~6--8 exhibit is a clean consequence
+of order-statistic bias under a tractable special case. Consider a
+seller $s$ that has received $n \ge 2$ bids
+$\beta_{1}, \dots, \beta_{n}$ from buyers with iid zero-mean
+estimation errors $\varepsilon_{i} \sim \mathcal{U}[-\sigma, +\sigma]$:
+\begin{equation}
+\label{eq:bid-decomp}
+\beta_{i} \;=\; v_{t}(h(s)) \cdot (1 + \varepsilon_{i}).
+\end{equation}
+The seller-level winning bid is $\max_{i} \beta_{i}$; its expected
+ratio to the home's current value is
+\begin{equation}
+\label{eq:ostat-bias}
+\mathbb{E}\!\left[\frac{\max_{i}\beta_{i}}{v_{t}(h(s))}\right]
+\;=\;
+1 + \mathbb{E}\!\left[\max_{i}\varepsilon_{i}\right]
+\;=\;
+1 + \sigma\,\frac{n - 1}{n + 1},
+\end{equation}
+using the standard order-statistic identity for the maximum of $n$
+iid uniform variates. The right-hand side strictly exceeds one for
+all $n \ge 2$ and all $\sigma > 0$; the gap grows in both $n$
+(more bidders per seller) and $\sigma$ (wider divergence of
+opinion). \Cref{eq:value-update} below propagates this expected gap
+multiplicatively across epochs, generating the exponential drift
+visible in \cref{fig:run6-bubble}.
+
+The clean form of \cref{eq:ostat-bias} relies on (i) a single seller
+and (ii) iid bids. The empirical bubble in
+\cref{sec:exp-bubble} averages a related but slightly different
+quantity (the buyer-side $\min_{s}$ in \cref{eq:value-update}); we
+have not derived a closed form for that case and rely on the
+simulation to certify $\bar{r}_{t} > 1$ across the parameter
+regimes studied. \Cref{sec:disc-bias} discusses the empirical
+implication of this distinction.
+
+\subsection{DE as a special case}
+\label{sec:framework-de-special}
+
+The Dynamic Equilibrium model of \citet{arbuzov2018de} corresponds to
+the following restriction of EDEM:
+\begin{itemize}[leftmargin=*,nosep]
+\item Estimation: $\varepsilon \sim \mathcal{U}[-\sigma_{i}, +\sigma_{i}]$,
+      with $\sigma_{i} \sim \mathcal{U}[0, \bar{\sigma}]$ across agents
+      (decimal convention; \cref{sec:framework-estimation}).
+\item Schedules: $Q_{s}, Q_{d}$ are restored toward linear-in-price
+      targets $\hat{Q}_{s}(p) = a_{s} + b_{s} p$,
+      $\hat{Q}_{d}(p) = a_{d} + b_{d} p$ once per balance period $T_{B}$.
+\item Clearing: $A$ is the rolling average of the last $W$ completed
+      sales. Let $k(t)$ count the completed sales up to tick $t$ and
+      $P^{\mathrm{sale}}_{j}$ denote the price of the $j$-th sale; then
+      \begin{equation}
+      \label{eq:price-rolling}
+      p_{t} \;=\; \frac{1}{m_{t}} \sum_{j=k(t)-m_{t}+1}^{k(t)} P^{\mathrm{sale}}_{j},
+      \qquad m_{t} = \min(W, k(t)).
+      \end{equation}
+\end{itemize}
+This is the formulation that \cref{sec:experiments-de} simulates. The
+sale-event indexing of \cref{eq:price-rolling} matters: ticks without
+completed sales contribute nothing, and the average is taken over
+realised events rather than time. The implementation maintains the
+window as a fixed-length deque of the last $W$ sale prices.
+
+The speculative-market EDEM variant of \cref{sec:experiments-edem}
+replaces \cref{eq:price-rolling} with a multiplicative per-epoch
+update on each home's value. Define:
+\begin{align*}
+\mathcal{W}_{b}(t) &= \{s \in \mathcal{S}_{t} : b \text{ holds the winning bid on } s \text{ during the epoch ending at } t\}, \\
+\mathcal{Y}_{t}    &= \{b : \mathcal{W}_{b}(t) \neq \varnothing\}.
+\end{align*}
+The per-epoch update is then
+\begin{equation}
+\label{eq:value-update}
+v_{t+T}(h) \;=\; v_{t}(h)\,\cdot\,\bar{r}_{t} \quad \forall h \in G,
+\qquad
+\bar{r}_{t} \;=\;
+\begin{cases}
+\dfrac{1}{|\mathcal{Y}_{t}|}\,\displaystyle\sum_{b \in \mathcal{Y}_{t}} \min_{s \in \mathcal{W}_{b}(t)} \dfrac{\beta_{b,s}^{(t)}}{v_{t}(h(s))}
+& \text{if } \mathcal{Y}_{t} \neq \varnothing, \\[1.6ex]
+1 & \text{if } \mathcal{Y}_{t} = \varnothing.
+\end{cases}
+\end{equation}
+
+The update is uniform across all homes in $G$. This is a strong
+\emph{propagation assumption}: real-estate ``comp'' signals
+empirically diffuse non-uniformly, weighted by neighbourhood,
+amenities, and time-since-sale. Adopting a uniform multiplier keeps
+the model focused on the order-statistic mechanism of
+\cref{sec:framework-asymmetry} rather than on diffusion geometry; we
+flag it as a candidate target for extension in \cref{sec:ext-clearing}.
+
+\subsection{Walrasian and Miller cases as limits}
+\label{sec:framework-walras-miller}
+
+Setting $\sigma_{i} \equiv 0$ for all $i$ collapses
+\cref{eq:estimation} to $E_{i,t}(h) = v_{t}(h)$: every agent agrees
+on the value of every home. The order-statistic drift of
+\cref{eq:ostat-bias} vanishes ($\bar{r}_{t} \equiv 1$) and the
+rolling clearing in \cref{eq:price-rolling} delivers a constant
+price set by $\hat{Q}_{s}(p^{*}) = \hat{Q}_{d}(p^{*})$. Under the
+additional assumption that the matching process and balancer
+introduce no frictions (instantaneous adjustment, costless
+encounters), EDEM approaches the Walrasian fixed-point equilibrium
+as a limiting case. Spatial frictions, patience, and the
+finite-population integerization of \cref{eq:Qs-update,eq:Qd-update}
+prevent exact equivalence at finite scales.
+
+If we instead retain heterogeneous $\sigma_{i}$ but freeze the
+dynamics ($T_{B} \to \infty$, single-period sale, no value update),
+we recover a \emph{Miller-style static premium mechanism}: the
+$N$ shares are assigned to the $N$ most optimistic of the
+$K > N$ potential investors, so the clearing price reflects the
+optimism of the marginal optimist rather than the mean valuation.
+Exact equivalence to the model in \citet{miller1977} requires
+short-selling restrictions and the fixed-supply assumption; the
+mechanism here is the same upper-tail selection but in a different
+institutional framing.
+
+The two regimes that empirical studies of divergence of opinion have
+struggled to reconcile (premium vs.\ discount;
+\cref{sec:bg-debate}) appear in EDEM as two ends of a continuum
+indexed by the balancer parameters $C_{b}, C_{s}$ and the
+ratio of estimation error to balancer strength. \Cref{sec:experiments}
+demonstrates this empirically.

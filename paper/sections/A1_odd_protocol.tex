@@ -1,0 +1,146 @@
+\section{ODD Protocol}
+\label{app:odd}
+
+This appendix documents EDEM in the standard ODD protocol for
+agent-based models \citep{grimm2020odd}.
+
+\subsection{Purpose and patterns}
+
+EDEM's purpose is to characterise the conditions under which an
+agent-based real-estate market reaches a stable equilibrium price,
+and to identify the mechanisms that prevent equilibrium when they
+do not. Patterns the model is designed to reproduce: stable
+band-bounded equilibria; endogenous business cycles; persistent
+shifts in the realised price relative to the textbook equilibrium
+under altered patience or density; multiplicative price drift in the
+absence of a balancer.
+
+\subsection{Entities, state variables, and scales}
+
+\paragraph{Entities.} \textbf{Buyers} and \textbf{Sellers}
+(\texttt{mesa.Agent} subclasses) and \textbf{Homes} (per-cell
+dataclass instances on a $32 \times 32$ toroidal grid).
+
+\paragraph{State variables.}
+\begin{itemize}[leftmargin=*,nosep]
+\item Buyer: epsilon (estimation-error bound), delay, current bid,
+      heading. EDEM variant additionally: lowest-bid-to-value ratio,
+      yellow flag.
+\item Seller: epsilon, patience timer, current ask price, dictionary
+      of received bids. EDEM additionally: number of bids, total
+      bids, best-bid-to-value, best-bid-to-true-value.
+\item Home: market price, last-sale tick, last-sale price, fair value
+      $v^{*}$, current value $v$.
+\item Model: rolling window of last 25 sale prices (DE), epoch
+      counter (EDEM), current cross-population epsilon (EDEM).
+\end{itemize}
+
+\paragraph{Spatial and temporal scales.} One spatial unit = one home;
+one tick is the smallest temporal unit. Each tick triggers one round
+of buyer movement and one round of seller bid-processing. DE balance
+period is 100 ticks; EDEM epoch is 20 ticks.
+
+\subsection{Process overview and scheduling}
+
+Per tick, in order:
+\begin{enumerate}[leftmargin=*,nosep]
+\item Each agent steps once (in randomised order over both classes).
+      A Buyer's step posts bids, then wiggles, then steps forward.
+      A Seller's step processes patience and best-bid logic.
+\item The model invokes the balancer:
+      DE recomputes linear targets every 100 ticks;
+      EDEM fires the per-epoch update every 20 ticks (using the
+      cycle-counter trick of \cref{sec:implementation-clearing} to
+      preserve buyer \texttt{is\_yellow} flags).
+\item The data collector samples model-level reporters.
+\end{enumerate}
+
+\subsection{Design concepts}
+
+\paragraph{Basic principles.} EDEM extends the dynamic
+divergence-of-opinion premise of \citet{miller1977} to a
+multi-period setting; agents act on noisy estimates of an unobservable
+fair value.
+
+\paragraph{Emergence.} The price level, agent population dynamics,
+and macroscopic regimes (band-stable, business-cycle, persistent
+shift, bubble, transitional) emerge from the local interaction of
+agent estimation, bidding, and patience timers; none of these
+phenomena are coded in directly.
+
+\paragraph{Adaptation.} Sellers lower ask prices when their patience
+timer elapses without high-enough bids; this is the only adaptive
+behaviour. Buyers do not adapt: they place bids drawn from a fixed
+distribution and accept by Cond.~2 (\cref{eq:cond2}).
+
+\paragraph{Objectives.} Sellers maximise realised sale price
+subject to patience; buyers minimise realised purchase price subject
+to Cond.~2. Neither has an explicit utility function; objectives
+are implicit in their action rules.
+
+\paragraph{Learning.} None in the baseline model
+(\cref{sec:ext-adaptive} sketches an adaptive extension).
+
+\paragraph{Prediction.} None.
+
+\paragraph{Sensing.} Buyers sense whether a seller is on their patch;
+sellers sense the bids in their own bid table. Neither senses the
+global market price directly.
+
+\paragraph{Interaction.} Direct: a buyer that lands on a seller's
+patch posts a bid via a mirrored-dictionary update on both sides.
+Indirect: the average ask price (DE) and the rolling sale-price
+average (DE) influence newly-spawned agents' starting prices.
+
+\paragraph{Stochasticity.} Used for: agent placement at setup;
+buyer heading initialisation and per-tick wiggle; epsilon draws
+per agent; per-bid epsilon-error draws; victim selection in the
+balancer; Bernoulli draws for fractional $C_{b}$ swaps in EDEM.
+All draws come from a single seeded \texttt{numpy.random.Generator}
+owned by the model.
+
+\paragraph{Collectives.} None.
+
+\paragraph{Observation.} The data collector records, per tick:
+market price (DE: rolling-25 mean; EDEM: average home value),
+agent counts, the equilibrium price implied by current schedules,
+the rolling-window fill count, and (EDEM) the current epsilon.
+Output is stacked into Parquet datasets, one per seed, for
+downstream analysis.
+
+\subsection{Initialisation}
+
+DE: spawn \texttt{equi\_qnty} sellers at random unique cells with
+patience $\sim \mathcal{U}[0, \texttt{init\_patience})$ and ask price
+drawn from $\mathcal{U}[-\bar{\sigma}, +\bar{\sigma}]$ around
+$p^{*}$; spawn \texttt{equi\_qnty} buyers at random cells.
+EDEM: 20 sellers and 20 buyers, all homes initialised with
+$v_{0}(h) = v^{*}(h) = 100$.
+
+\subsection{Input data}
+
+None. EDEM is a closed model; all dynamics are endogenous. The shock
+hooks in Run~5 are scheduled in the experiment script, not loaded
+from external data.
+
+\subsection{Submodels}
+
+\paragraph{Estimation function.} \cref{eq:estimation} with
+$\varepsilon \sim \mathcal{U}[-\sigma_{i}, +\sigma_{i}]$ and
+$\sigma_{i} \sim \mathcal{U}[0, \bar{\sigma}]$.
+
+\paragraph{Bid acceptance.} \cref{eq:cond2}.
+
+\paragraph{Market price.} DE: \cref{eq:price-rolling}, the rolling
+mean of the last $W = 25$ sale prices. EDEM: \cref{eq:value-update},
+the per-epoch multiplicative update.
+
+\paragraph{Balancer.} DE: linear-target restoration every $T_{B}$
+ticks. EDEM: \cref{eq:Qs-update,eq:Qd-update} in finite-population
+form, with fractional $C_{b}$ realised as integer + Bernoulli swaps
+and a population floor of one agent per side.
+
+\paragraph{Agent spawn / exit.} On a sale, both counterparties leave
+the market and a fresh pair is spawned by the balancer with patience
+drawn from $\mathcal{U}[50, \texttt{init\_patience})$ for sellers
+and immediate readiness for buyers.

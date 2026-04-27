@@ -1,0 +1,88 @@
+\section{Parameter Tables for All Runs}
+\label{app:params}
+
+The Mesa source files in \path{python_simulation/experiments/} are the
+authoritative parameter manifest; the tables below are reproduced
+verbatim from the model-construction kwargs.
+
+\subsection{Common parameters across all runs}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{l l}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+World size                  & $32 \times 32$ toroidal \\
+Seeds per run               & $\ge 8$ (typically 10) \\
+Bid-acceptance rule         & \texttt{netlogo} (\cref{eq:cond2}) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Dynamic Equilibrium runs (1--5)}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{l c c c c c}
+\toprule
+\textbf{Parameter} & \textbf{Run 1} & \textbf{Run 2} & \textbf{Run 3} & \textbf{Run 4} & \textbf{Run 5} \\
+\midrule
+Supply intercept $a_{s}$    & $0$    & $0$    & $0$    & $0$    & $0$    \\
+Supply slope $b_{s}$        & $0.5$  & $0.5$  & $0.5$  & $0.5$  & $0.5$  \\
+Demand intercept $a_{d}$    & $100$  & $100$  & $100$  & $50$   & $100\!\to\!50$ (A) \\
+                            &        &        &        &        & $\{125,75\}$ (B) \\
+Demand slope $b_{d}$        & $-0.5$ & $-0.5$ & $-0.5$ & $-0.5$ & $-0.5$ \\
+Max valuation error $\bar{\sigma}$ (\%)  & $5$   & $25$  & $5$   & $5$   & $5$   \\
+Max patience               & $50$   & $50$   & $100$  & $50$   & $50\!\to\!165$ (A) \\
+Balance period $T_{B}$     & $100$  & $100$  & $100$  & $100$  & $100$  \\
+Sale window $W$            & $25$   & $25$   & $25$   & $25$   & $25$   \\
+Ticks per seed             & $20{,}000$ & $20{,}000$ & $20{,}000$ & $20{,}000$ & $12{,}000$ \\
+Equilibrium price $p^{*}$  & $100$  & $100$  & $100$  & $50$   & $100$ (initial) \\
+Equilibrium quantity $q^{*}$ & $50$  & $50$   & $50$   & $25$   & $50$ (initial) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Run~5 introduces shocks via the model's \texttt{set\_demand} and
+patience-rebinding hooks. Scenario~A schedules a single demand shock
+at $t = 3000$ followed by a patience boost at $t = 7000$;
+Scenario~B toggles the demand intercept between $125$ and $75$ every
+$2000$ ticks.
+
+\subsection{Speculative-market EDEM runs (6--8)}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{l c c c}
+\toprule
+\textbf{Parameter} & \textbf{Run 6} & \textbf{Run 7} & \textbf{Run 8} \\
+\midrule
+Initial $\bar{\sigma}$ (\%)    & $15$  & $15$  & $5$ \\
+$\bar{\sigma}$ growth / epoch  & $0$   & $0$   & $+0.5$ pp \\
+Balancer coefficient $C_{b}$   & $0$   & $\{+1, 0, -1\}$ & $-1$ \\
+Initial buyers / sellers       & $20\,/\,20$ & $20\,/\,20$ & $20\,/\,20$ \\
+Epoch length (\texttt{init\_patience}) & $20$ & $20$ & $20$ \\
+Ticks per seed                 & $3{,}000$ & $3{,}000$ & $3{,}000$ \\
+True value $v^{*}(h)$ (uniform across $h$) & $100$ & $100$ & $100$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Reproduction}
+
+From a clean checkout:
+\begin{lstlisting}[language=bash]
+cd python_simulation && pip install -e ".[dev]"
+pytest                                  # 42 unit tests
+for f in experiments/run*.py; do
+    python "$f"
+done                                    # writes paper/figures/
+cd ../paper && bash build.sh            # builds main.pdf
+\end{lstlisting}
+
+End-to-end reproduction takes approximately twenty minutes on a
+2024-era laptop.

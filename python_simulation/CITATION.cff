@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+title: "EDEM: Estimated Dynamic Equilibrium Model (Python/Mesa Implementation)"
+message: "If you use this software, please cite both the software and the paper."
+type: software
+authors:
+  - family-names: Arbuzov
+    given-names: Mikhail
+    affiliation: "Department of Economics, San José State University"
+    email: mikhail.arbuzov@sjsu.edu
+license: MIT
+repository-code: "https://github.com/sibmike/realestate-edem-python"
+preferred-citation:
+  type: article
+  title: "Estimated Dynamic Equilibrium Model: Supply and Demand as a Sample Path of a Stochastic Process"
+  authors:
+    - family-names: Arbuzov
+      given-names: Mikhail
+      affiliation: "Department of Economics, San José State University"
+      email: mikhail.arbuzov@sjsu.edu
+  year: 2026
+  notes: "arXiv preprint; replace with arXiv ID once assigned."
+keywords:
+  - agent-based-modelling
+  - real-estate
+  - divergence-of-opinion
+  - bubbles
+  - mesa
+  - econophysics

@@ -1,0 +1,82 @@
+% !TEX program = xelatex
+% Estimated Dynamic Equilibrium Model: Supply and Demand as a
+% Sample Path of a Stochastic Process — arXiv preprint
+%
+% Build: ./build.sh   (xelatex + biber + xelatex + xelatex)
+
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\usepackage[capitalize,nameinlink]{cleveref}
+\usepackage[round]{natbib}
+\usepackage{authblk}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{epigraph}
+
+% Listings style for pseudocode / Mesa snippets
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{black!30}
+}
+
+\theoremstyle{definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+
+\graphicspath{{figures/}}
+\setcitestyle{authoryear,open={(},close={)}}
+
+\title{Estimated Dynamic Equilibrium Model:\\
+       Supply and Demand as a Sample Path of a Stochastic Process}
+
+\author[1]{Mikhail Arbuzov}
+\affil[1]{Department of Economics, San Jos\'e State University\\
+          \texttt{mikhail.arbuzov@sjsu.edu}}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{sections/00_abstract}
+\end{abstract}
+
+\noindent\textbf{Keywords:} agent-based model; bottom-up; stochastic process; disequilibrium; divergence of opinion; real-estate market
+
+\input{sections/01_introduction}
+\input{sections/02_background}
+\input{sections/03_framework}
+\input{sections/04_implementation}
+\input{sections/05_experiments}
+\input{sections/06_discussion}
+\input{sections/07_extensions}
+\input{sections/08_conclusion}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\appendix
+\input{sections/A1_odd_protocol}
+\input{sections/A2_parameters}
+
+\end{document}
