@@ -3,16 +3,16 @@
 
 EDEM and DE are implemented in the Python agent-based modelling
 framework Mesa~\citep{masad2015mesa}, replacing the earlier NetLogo
-prototypes archived at
-\url{https://github.com/sibmike/netlogo-realestate-simulations}. The
+prototypes whose NetLogo source is preserved in the
+\path{drafts/netlogo/} subdirectory of the same repository. The
 choice of Mesa is pragmatic: its turtle--patch primitives map cleanly
 onto NetLogo's, but the surrounding Python ecosystem (NumPy, pandas,
 matplotlib, pytest) supports batched experimentation, deterministic
 seeding, and reproducible figure regeneration that the original
-NetLogo code cannot. The Mesa port and all experiments described
-herein are released under MIT licence at
-\url{https://github.com/sibmike/realestate-edem-python}; the
-companion paper sources (CC-BY-4.0) live in the same repository.
+NetLogo code cannot. The Mesa port, the NetLogo source, and the
+present paper are released together at
+\url{https://github.com/sibmike/dynamic-disequilibrium} --- code under MIT,
+paper under CC-BY-4.0.
 
 \subsection{Spatial structure and agents}
 \label{sec:implementation-space}

@@ -44,8 +44,8 @@ notebooks/            # narrated walkthrough (forthcoming)
 ## Install
 
 ```bash
-git clone https://github.com/sibmike/realestate-edem-python
-cd realestate-edem-python/python_simulation
+git clone https://github.com/sibmike/dynamic-disequilibrium
+cd dynamic-disequilibrium/python_simulation
 pip install -e ".[dev]"
 ```
 

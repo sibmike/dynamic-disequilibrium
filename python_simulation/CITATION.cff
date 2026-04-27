@@ -8,7 +8,7 @@ authors:
     affiliation: "Department of Economics, San José State University"
     email: mikhail.arbuzov@sjsu.edu
 license: MIT
-repository-code: "https://github.com/sibmike/realestate-edem-python"
+repository-code: "https://github.com/sibmike/dynamic-disequilibrium"
 preferred-citation:
   type: article
   title: "Estimated Dynamic Equilibrium Model: Supply and Demand as a Sample Path of a Stochastic Process"
