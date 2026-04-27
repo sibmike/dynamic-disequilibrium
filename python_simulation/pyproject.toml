@@ -6,7 +6,10 @@ build-backend = "setuptools.build_meta"
 name = "edem"
 version = "0.1.0"
 description = "Estimated Dynamic Equilibrium Model: a Mesa-based agent-based model of real-estate markets with heterogeneous, error-prone valuations."
-authors = [{ name = "Mikhail Arbuzov", email = "mikhail.arbuzov@sjsu.edu" }]
+authors = [
+    { name = "Mikhail Arbuzov", email = "mikhail.arbuzov@sjsu.edu" },
+    { name = "Sisong Bei" },
+]
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

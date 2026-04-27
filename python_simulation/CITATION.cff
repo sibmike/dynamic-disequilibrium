@@ -7,6 +7,9 @@ authors:
     given-names: Mikhail
     affiliation: "Department of Economics, San José State University"
     email: mikhail.arbuzov@sjsu.edu
+  - family-names: Bei
+    given-names: Sisong
+    affiliation: "Department of Economics, San José State University"
 license: MIT
 repository-code: "https://github.com/sibmike/dynamic-disequilibrium"
 preferred-citation:
@@ -17,6 +20,9 @@ preferred-citation:
       given-names: Mikhail
       affiliation: "Department of Economics, San José State University"
       email: mikhail.arbuzov@sjsu.edu
+    - family-names: Bei
+      given-names: Sisong
+      affiliation: "Department of Economics, San José State University"
   year: 2026
   notes: "arXiv preprint; replace with arXiv ID once assigned."
 keywords:

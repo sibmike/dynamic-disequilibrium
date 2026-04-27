@@ -110,7 +110,7 @@ checkout by the corresponding script in
 
 ```bibtex
 @misc{arbuzov2026dynamic,
-  author = {Arbuzov, Mikhail},
+  author = {Arbuzov, Mikhail and Bei, Sisong},
   title  = {{Estimated Dynamic Equilibrium Model:
             Supply and Demand as a Sample Path of a Stochastic Process}},
   year   = {2026},
