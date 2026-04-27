@@ -7,16 +7,16 @@ Repository for the paper
 > San José State University, 2026.
 > [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) *(forthcoming)*.
 
-The repository was previously called
-`netlogo-realestate-simulations` and held only the original 2018
-NetLogo prototype. It has been renamed `dynamic-disequilibrium` to
-reflect what the model actually shows: that under heterogeneous,
-error-prone valuations the textbook ``dynamic equilibrium'' is in
-fact a non-generic state, and realised markets spend their time in
-one of six identifiable disequilibrium regimes. The repository now
-holds the EDEM theoretical framework, a Python/Mesa implementation
-that replaces the NetLogo prototype, and the historical NetLogo
-source preserved alongside the new code.
+This repository supersedes the 2018 NetLogo prototype at
+[`sibmike/netlogo-realestate-simulations`](https://github.com/sibmike/netlogo-realestate-simulations),
+which held only the original `.nlogo` file. The new name reflects
+what the model actually shows: under heterogeneous, error-prone
+valuations the textbook ``dynamic equilibrium'' is in fact a
+non-generic state, and realised markets spend their time in one of
+six identifiable disequilibrium regimes. This repository now holds
+the EDEM theoretical framework, a Python/Mesa implementation that
+replaces the NetLogo prototype, and the historical NetLogo source
+preserved alongside the new code.
 
 ## Layout
 
