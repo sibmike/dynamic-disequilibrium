@@ -3,7 +3,7 @@
 Submission package for:
 
 > **Estimated Dynamic Equilibrium Model: Supply and Demand as a Sample Path of a Stochastic Process**
-> — Mikhail Arbuzov and Sisong Bei, San José State University, 2026.
+> — Mikhail Arbuzov and Sisong Bei, 2026.
 
 Source files: [`edem/`](edem/). Final upload bundle: [`edem_arxiv.zip`](edem_arxiv.zip) (~5.7 MB, 28-page PDF when arXiv auto-builds it).
 
@@ -40,8 +40,8 @@ Copy the values below directly into the arXiv submission form.
 |---|---|
 | Title | Estimated Dynamic Equilibrium Model: Supply and Demand as a Sample Path of a Stochastic Process |
 | Authors | Mikhail Arbuzov; Sisong Bei |
-| Affiliation | Department of Economics, San José State University |
-| Email (contact) | mikhail.arbuzov@sjsu.edu |
+| Affiliation | — |
+| Email (contact) | (fill in at submission time) |
 | Primary category | `econ.GN` (General Economics) |
 | Cross-list categories | `q-fin.GN` (General Finance); `cs.MA` (Multi-Agent Systems); `nlin.AO` (Adaptation and Self-Organizing Systems) |
 | License | CC-BY-4.0 |

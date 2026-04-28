@@ -3,9 +3,8 @@
 Python/[Mesa](https://github.com/projectmesa/mesa) implementation of the
 agent-based real-estate market model in:
 
-> Arbuzov, M. *Estimated Dynamic Equilibrium Model: Supply and Demand
-> as a Sample Path of a Stochastic Process.* Department of Economics,
-> San José State University, 2026.
+> Arbuzov, M. and Bei, S. *Estimated Dynamic Equilibrium Model:
+> Supply and Demand as a Sample Path of a Stochastic Process.* 2026.
 > [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) *(forthcoming)*.
 
 The package replaces the earlier NetLogo prototypes archived at
