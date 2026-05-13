@@ -300,6 +300,26 @@ the closed-form theorem isolates the structural ingredient
 $\bar{r}_{t}$ inherits, and that \cref{tab:rbar-empirical} confirms
 the inheritance.
 
+\paragraph{Relation to the winner's curse.}
+\Cref{eq:ostat-bias} also recovers the classical winner's curse
+\citep{thaler1988winners} as a static special case. In a
+common-value auction, the winning bidder is selected precisely
+because her signal is the most favourable draw among the bidder
+pool: in EDEM notation, the seller selects
+$\beta_{(n)} = \max_{i} \beta_{i}$, so the winning error is
+$\varepsilon_{(n)} = \max_{i} \varepsilon_{i}$. Even when
+$\mathbb{E}[\varepsilon_{i}] = 0$, the selected error satisfies
+$\mathbb{E}[\varepsilon_{(n)}] > 0$ --- under the uniform
+assumption of \cref{eq:bid-decomp}, exactly $\sigma(n-1)/(n+1)$.
+The curse is thus an order-statistic selection effect before it is
+a behavioural failure: optimism is not required for the winning
+bid to be upward-selected. Rational bid shading can correct the
+expected payment in a static auction, but it does not remove the
+allocation fact that the winning signal comes from the upper tail.
+EDEM's contribution is to feed that upper-tail clearing price into
+the next period's valuation anchor, turning the one-period
+winner's-curse effect into a dynamic drift mechanism.
+
 \subsection{DE as a special case}
 \label{sec:framework-de-special}
 

@@ -40,7 +40,12 @@ behavioural bias but a statistical asymmetry: each seller selects the
 \emph{maximum} bid received, and the maximum of $N$ noisy estimates
 of a fair value is, in expectation, larger than the fair value
 itself. \cref{eq:value-update} compounds this asymmetry
-multiplicatively across epochs.
+multiplicatively across epochs. This is the dynamic generalisation of
+the classical winner's curse \citep{thaler1988winners}
+(\cref{sec:framework-asymmetry}): the same upper-tail-selection effect
+that biases the expected payment in a single common-value auction,
+fed epoch-to-epoch into the next anchor value, produces unbounded
+drift.
 
 This refines the standard ``divergence of opinion'' story.
 \citet{miller1977}'s static premium emerges from constrained supply:

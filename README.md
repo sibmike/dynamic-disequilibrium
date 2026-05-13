@@ -82,7 +82,7 @@ PDF figure and a Parquet dataset of every per-tick model reporter.
 
 | Path | Purpose |
 |---|---|
-| [`paper/`](paper/) | LaTeX source. 29 pages, 9 figures, CC-BY-4.0. Build with `cd paper && bash build.sh` (xelatex × 3 + bibtex). |
+| [`paper/`](paper/) | LaTeX source. 30 pages, 9 figures, CC-BY-4.0. Build with `cd paper && bash build.sh` (xelatex × 3 + bibtex). |
 | [`arxiv/`](arxiv/) | Self-contained arXiv submission package — sources, figures, and the upload `.zip`, ready to upload. |
 | [`python_simulation/`](python_simulation/) | Mesa implementation, MIT-licensed. 42 pytest unit tests. |
 | [`drafts/`](drafts/) | Two 2018 SJSU markdown drafts plus the legacy NetLogo prototype that seeded this work, preserved as historical record. |
