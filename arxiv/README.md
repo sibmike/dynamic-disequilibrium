@@ -5,7 +5,7 @@ Submission package for:
 > **Estimated Dynamic Equilibrium Model: Supply and Demand as a Sample Path of a Stochastic Process**
 > — Mikhail Arbuzov and Sisong Bei, 2026.
 
-Source files: [`edem/`](edem/). Final upload bundle: [`edem_arxiv.zip`](edem_arxiv.zip) (~5.7 MB, 28-page PDF when arXiv auto-builds it).
+Source files: [`edem/`](edem/). Final upload bundle: [`edem_arxiv.zip`](edem_arxiv.zip) (~5.7 MB, 29-page PDF when arXiv auto-builds it).
 
 ## What's in the zip
 
@@ -45,7 +45,7 @@ Copy the values below directly into the arXiv submission form.
 | Primary category | `econ.GN` (General Economics) |
 | Cross-list categories | `q-fin.GN` (General Finance); `cs.MA` (Multi-Agent Systems); `nlin.AO` (Adaptation and Self-Organizing Systems) |
 | License | CC-BY-4.0 |
-| Comments | 28 pages, 9 figures. Source code: see in-paper URL. |
+| Comments | 29 pages, 9 figures. Source code: see in-paper URL. |
 
 ### Primary-category decision
 
@@ -115,7 +115,7 @@ this version:
 2. Click "Start New Submission".
 3. Upload `edem_arxiv.zip`.
 4. Wait for arXiv's automatic compilation; verify the preview PDF
-   matches the local 28-page build.
+   matches the local 29-page build.
 5. Fill metadata from the table above.
 6. Paste the plain-text abstract.
 7. Pick categories: primary `econ.GN`; cross-lists

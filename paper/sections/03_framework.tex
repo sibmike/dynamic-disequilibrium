@@ -36,13 +36,20 @@ Each agent is endowed with a personal \emph{estimation function}.
 For an agent $i$ valuing home $h$ at time $t$:
 \begin{equation}
 \label{eq:estimation}
-E_{i,t}(h) \;=\; v_{t}(h) \cdot \bigl(1 + \varepsilon_{i,t}\bigr),
+E_{i,t}(h) \;=\; v_{t}(h) \cdot \bigl(1 + \varepsilon_{i,t,h}\bigr),
 \qquad
-\varepsilon_{i,t} \sim F_{i}(\sigma_{i}),
+\varepsilon_{i,t,h} \;\stackrel{\mathrm{iid}}{\sim}\; F_{i}(\sigma_{i}),
 \end{equation}
 where $F_{i}$ is a zero-mean error distribution with agent-specific
-dispersion $\sigma_{i}$. Concretely, $\mathbb{E}[\varepsilon_{i,t}] = 0$
-and $\operatorname{Var}(\varepsilon_{i,t})$ is increasing in
+dispersion $\sigma_{i}$. The three-way index is essential: each
+\emph{bid} that agent $i$ places --- on a different home, or even on
+the same home at a different tick --- draws an independent realisation
+of the error. Without per-bid independence, the buyer-side
+order-statistic logic of Cond.~2 (\cref{sec:framework-cond2}) and
+the per-epoch update of \cref{eq:value-update} would degenerate to
+single-draw statistics. Concretely,
+$\mathbb{E}[\varepsilon_{i,t,h}] = 0$ and
+$\operatorname{Var}(\varepsilon_{i,t,h})$ is increasing in
 $\sigma_{i}$. The DE specialisation
 (\cref{sec:framework-de-special}) takes $F_{i}$ as the symmetric
 uniform $\mathcal{U}[-\sigma_{i},\,+\sigma_{i}]$; in the broader
@@ -146,6 +153,15 @@ under the bid-selection asymmetry alone. The simulations in
 \cref{sec:experiments-edem} use $C_{s} = C_{b}$ and report the
 single number $C_{b}$.
 
+\Cref{eq:Qs-update,eq:Qd-update} describe the \emph{interior}
+dynamics. A population floor of one agent per side
+(\cref{sec:implementation-balancer}) truncates the random walk
+whenever $\max(Q_{s}, Q_{d})$ would otherwise dictate killing the
+last remaining agent on the depleted side; under that boundary the
+expectation equations no longer hold literally. The one-vs-many
+regime that emerges for strong $|C_{b}|$ in Run~7
+(\cref{sec:exp-balancer-sweep}) is exactly this boundary state.
+
 Together,
 \cref{eq:estimation,eq:price-functional,eq:Qs-update,eq:Qd-update}
 define a coupled stochastic process whose realisation is a sample
@@ -181,12 +197,16 @@ statistic drift. The prior write-up of the model in
 we restore the version that matches the simulation results actually
 reported there (\cref{sec:implementation-cond2}).
 
-\subsection{The order-statistic drift: an analytical aside}
+\subsection{The order-statistic drift: a special-case mechanism}
 \label{sec:framework-asymmetry}
 
-The bubble mechanism that Runs~6--8 exhibit is a clean consequence
-of order-statistic bias under a tractable special case. Consider a
-seller $s$ that has received $n \ge 2$ bids
+The bubble mechanism that Runs~6--8 exhibit is a consequence of
+order-statistic bias. We give a closed-form result for a tractable
+special case below, then connect it empirically to the actual update
+rule \cref{eq:value-update}.
+
+\paragraph{Closed form for the seller-side maximum.}
+Consider a seller $s$ that has received $n \ge 2$ bids
 $\beta_{1}, \dots, \beta_{n}$ from buyers with iid zero-mean
 estimation errors $\varepsilon_{i} \sim \mathcal{U}[-\sigma, +\sigma]$:
 \begin{equation}
@@ -206,19 +226,79 @@ ratio to the home's current value is
 using the standard order-statistic identity for the maximum of $n$
 iid uniform variates. The right-hand side strictly exceeds one for
 all $n \ge 2$ and all $\sigma > 0$; the gap grows in both $n$
-(more bidders per seller) and $\sigma$ (wider divergence of
-opinion). \Cref{eq:value-update} below propagates this expected gap
-multiplicatively across epochs, generating the exponential drift
-visible in \cref{fig:run6-bubble}.
+(more bidders per seller) and $\sigma$ (wider divergence of opinion).
 
-The clean form of \cref{eq:ostat-bias} relies on (i) a single seller
-and (ii) iid bids. The empirical bubble in
-\cref{sec:exp-bubble} averages a related but slightly different
-quantity (the buyer-side $\min_{s}$ in \cref{eq:value-update}); we
-have not derived a closed form for that case and rely on the
-simulation to certify $\bar{r}_{t} > 1$ across the parameter
-regimes studied. \Cref{sec:disc-bias} discusses the empirical
-implication of this distinction.
+\paragraph{What \cref{eq:ostat-bias} does and does not prove.}
+\Cref{eq:ostat-bias} establishes that the \emph{seller-side
+maximum} has expected ratio strictly above one. The per-epoch update
+in \cref{eq:value-update} compounds a related but distinct quantity
+$\bar{r}_{t}$: a buyer-side mean over each buyer's $\min_{s}$ winning
+ratio. We have not derived a closed form for $\bar{r}_{t}$. Two
+further care points apply when moving from the clean theorem to the
+sample-path behaviour of \cref{fig:run6-bubble}:
+\begin{itemize}[leftmargin=*,nosep]
+\item \emph{Expected level vs.\ typical trajectory.} For an iid
+      multiplicative process $v_{T} = v_{0}\prod_{t}r_{t}$, the
+      expectation $\mathbb{E}[v_{T}] = v_{0}\,(\mathbb{E}[r])^{T}$
+      grows multiplicatively whenever $\mathbb{E}[r]>1$, but the
+      \emph{median} (and any typical sample path) is governed by
+      $\mathbb{E}[\log r]$, with median growth controlled by
+      $\exp(T\,\mathbb{E}[\log r])$. By Jensen's inequality
+      $\mathbb{E}[\log r] \le \log \mathbb{E}[r]$, so
+      $\mathbb{E}[r]>1$ does not on its own imply
+      $\mathbb{E}[\log r]>0$.
+\item \emph{Boundary truncation.} \Cref{eq:value-update} contains a
+      $\bar{r}_{t}=1$ fallback for epochs with no winning bids
+      ($\mathcal{Y}_{t}=\varnothing$); this puts a point mass at
+      unity on the distribution of $r_{t}$ that the clean
+      theorem does not capture.
+\end{itemize}
+
+\paragraph{Empirical bridge.}
+\Cref{tab:rbar-empirical} reports the empirical distribution of
+$\bar{r}_{t}$ extracted directly from the EDEM-regime experiments of
+\cref{sec:experiments-edem}, computed as
+$\bar{r}_{t} = v_{t+T}(h)/v_{t}(h)$ at every epoch boundary across
+all seeds. Three rows are reported per scenario: mean, median, and
+the share of epochs with $\bar{r}_{t}>1$; an additional row reports
+$\mathbb{E}[\log \bar{r}_{t}]$, which is the relevant
+condition for sample-path exponential growth. The condition
+$\mathbb{E}[\log \bar{r}_{t}] > 0$ holds in every regime examined,
+with the no-balancer Run~6 the strongest at $0.041$ per epoch.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Empirical distribution of the per-epoch multiplier
+$\bar{r}_{t}$ in the EDEM regimes (\cref{sec:experiments-edem}),
+across 1500 epochs (10 seeds, 150 epochs/seed). The
+empty-$\mathcal{Y}_{t}$ point mass at $1$ shows up as a low
+$\Pr(\bar{r}_{t}>1)$ for the balanced regimes; in those cases the
+relevant growth quantity is $\mathbb{E}[\log \bar{r}_{t}]$, whose
+positivity certifies sample-path exponential growth.}
+\label{tab:rbar-empirical}
+\begin{tabular}{l c c c c}
+\toprule
+\textbf{Regime} & $\mathbb{E}[\bar r_t]$ & $\Pr(\bar r_t>1)$ & $\mathbb{E}[\log \bar r_t]$ & median$\,\bar r_t$ \\
+\midrule
+Run 6 ($C_b=0,\ \bar\sigma=0.15$)            & 1.0429 & 83.5\% & $+0.0411$ & 1.044 \\
+Run 7 ($C_b=+1,\ \bar\sigma=0.15$)           & 1.0104 & 19.7\% & $+0.0098$ & 1.000 \\
+Run 7 ($C_b=-1,\ \bar\sigma=0.15$)           & 1.0153 & 25.4\% & $+0.0144$ & 1.000 \\
+Run 8 ($C_b=-1,\ \bar\sigma\!\nearrow$)      & 1.0287 & 24.9\% & $+0.0236$ & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\Cref{eq:ostat-bias} should therefore be read as the
+\emph{mechanism}: the same order-statistic logic that yields the
+closed form for the seller-side maximum also produces empirical
+$\mathbb{E}[\log \bar{r}_{t}] > 0$ for the buyer-min update we
+actually simulate. We do not claim that
+\cref{eq:ostat-bias} proves \cref{fig:run6-bubble}; we claim that
+the closed-form theorem isolates the structural ingredient
+(maximum-order-statistic selection) that the empirical
+$\bar{r}_{t}$ inherits, and that \cref{tab:rbar-empirical} confirms
+the inheritance.
 
 \subsection{DE as a special case}
 \label{sec:framework-de-special}

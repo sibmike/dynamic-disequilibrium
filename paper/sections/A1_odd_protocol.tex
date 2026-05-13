@@ -73,10 +73,12 @@ timer elapses without high-enough bids; this is the only adaptive
 behaviour. Buyers do not adapt: they place bids drawn from a fixed
 distribution and accept by Cond.~2 (\cref{eq:cond2}).
 
-\paragraph{Objectives.} Sellers maximise realised sale price
-subject to patience; buyers minimise realised purchase price subject
-to Cond.~2. Neither has an explicit utility function; objectives
-are implicit in their action rules.
+\paragraph{Objectives.} Sellers maximise realised sale price subject
+to patience. Buyers commit only to offers whose realised bid is at or
+above their own running benchmark over their outstanding bids
+(\cref{eq:cond2}) --- a selection rule, not a price-minimisation
+objective. Neither agent class has an explicit utility function;
+objectives are implicit in their action rules.
 
 \paragraph{Learning.} None in the baseline model
 (\cref{sec:ext-adaptive} sketches an adaptive extension).

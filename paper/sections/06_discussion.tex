@@ -1,7 +1,8 @@
 \section{Discussion}
 \label{sec:discussion}
 
-The eight experiments together support three substantive claims about
+The eight primary experiments plus the Run-9 sensitivity grid
+together support three substantive claims about
 how real markets generate the price patterns that empirical research
 has found contradictory.
 
@@ -60,16 +61,23 @@ characterisations of distinct epochs in the same underlying process.
 
 Run~7's three-way comparison shows that no setting of the EDEM
 balancer coefficient $C_{b}$ within the parameter grid we examined
-restores $v_{t}/v^{*} = 1$. The mean-reverting case ($C_{b} = +1$)
-plateaus near $4 \times$; the trend-following case ($C_{b} = -1$)
+restores $v_{t}/v^{*} = 1$, and the 30-cell sweep of Run~9
+(\cref{sec:exp-sensitivity}) reproduces this finding at every
+combination of $C_{b}$ and $\bar{\sigma}$ tested. The
+mean-reverting case ($C_{b} = +1$) plateaus near $4 \times$ at
+$\bar{\sigma} = 0.15$; the trend-following case ($C_{b} = -1$)
 continues drifting upward; the no-balancer case dominates both. A
-crucial corollary is that \emph{policy interventions cast as
-balancer adjustments will not, by themselves, prevent persistent
-mispricing.} The asymmetry is structural to the bidding mechanism;
-to neutralise it, an intervention would have to change either the
-selection rule (e.g., uniform random matching instead of max-bid) or
-the per-epoch update rule (e.g., a winsorised mean instead of the
-arithmetic mean). \cref{sec:extensions} sketches both alternatives.
+corollary, qualified by the parameter range surveyed, is that
+\emph{linear policy interventions cast as balancer adjustments will
+not, on the evidence assembled here, eliminate persistent
+mispricing.} We do not claim this as an impossibility result --- the
+parameter grid is finite, and we have not explored extreme
+$|C_{b}|$ values where the population dynamics qualitatively change.
+The asymmetry is structural to the bidding mechanism; to neutralise
+it, an intervention would have to change either the selection rule
+(e.g., uniform random matching instead of max-bid) or the per-epoch
+update rule (e.g., a winsorised mean instead of the arithmetic
+mean). \Cref{sec:extensions} sketches both alternatives.
 
 The companion observation --- that the no-balancer case dominates
 the trend-following case in our simulation --- refines the framing

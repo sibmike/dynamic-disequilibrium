@@ -1,7 +1,10 @@
 \section{Experiments and Results}
 \label{sec:experiments}
 
-We report eight controlled experiments grouped into two regimes.
+We report eight primary controlled experiments grouped into two
+regimes, plus a sensitivity-grid sweep (Run~9,
+\cref{sec:exp-sensitivity}) that anchors the conclusions across a
+30-cell parameter grid.
 \Cref{sec:experiments-de} (Runs~1--5) uses the Dynamic Equilibrium
 specialisation of EDEM with linear supply and demand schedules,
 discrete sales, and a rolling-mean clearing price; these isolate the
@@ -117,9 +120,12 @@ crosses a seller's home before the seller's patience timer expires.
 Sellers therefore lower ask prices repeatedly without receiving
 adequate bids, and the realised sale prices --- and hence the rolling
 market price --- settle \emph{below} the textbook equilibrium.
-\Cref{fig:run4-density} shows a steady drift to roughly $p \approx
-37$, an $18\%$ shortfall, with the seller population shrinking to
-$\sim 19$ and the buyer population growing to $\sim 30$ as the
+\Cref{fig:run4-density} shows a steady downward drift; the
+mean realised price across the second half of the simulation is
+$p \approx 41$, an $18\%$ shortfall against the textbook
+equilibrium of 50, with episodes reaching as low as $p \approx 37$
+(a $26\%$ shortfall at the trough). The seller population shrinks
+to $\sim 19$ and the buyer population grows to $\sim 30$ as the
 balancer chases the depressed price. Patience and density are partial
 substitutes (\cref{sec:bg-dynamics}): both proxy for time-on-market.
 
@@ -298,7 +304,7 @@ double-exponential.}
 \subsubsection{Run 9 -- Sensitivity grid}
 \label{sec:exp-sensitivity}
 
-The eight runs reported above each fix a single parameter vector. To
+The eight primary runs reported above each fix a single parameter vector. To
 rule out the possibility that the order-statistic drift of
 \cref{sec:framework-asymmetry} is an artefact of one well-chosen
 calibration, we sweep $C_{b}$ and $\bar{\sigma}$ over a $5 \times 6$
@@ -350,7 +356,7 @@ order-statistic drift produces $v_{t}/v^{*} > 1$ in every cell.}
 % =====================================================================
 
 \Cref{tab:experiment-summary} consolidates the end-of-run statistics.
-The eight runs sweep three parameter axes: estimation noise
+The eight primary runs sweep three parameter axes: estimation noise
 ($\bar{\sigma}$), seller patience, and agent density (Runs 1--4); a
 shock schedule (Run~5); and the EDEM balancer parameter $C_{b}$ with
 a fixed or growing $\bar{\sigma}$ (Runs 6--8). Together they delineate
@@ -379,7 +385,7 @@ $v_{t}/v^{*}$ ratio.}
 5 & shock at $t=3000$, then re-shocks             & price chases moving target   & transitional       \\
 \midrule
 6 & EDEM, $C_{b} = 0$, $\bar{\sigma}=15\%$        & $v_{t}/v^{*} = 421\times$    & runaway bubble     \\
-7 & EDEM, $C_{b} \in \{-1, 0, +1\}$               & $\{7.7, 421, 4.2\}\times$    & balancer-shaped    \\
+7 & EDEM, $C_{b} \in \{-1, 0, +1\}$               & $7.7,\,421,\,4.2\times$ (in $C_b$ order)    & balancer-shaped    \\
 8 & EDEM, $C_{b} = -1$, $\bar{\sigma}: 5\to80$    & $v_{t}/v^{*} = 30\times$     & sustained super-linear \\
 \bottomrule
 \end{tabular}
