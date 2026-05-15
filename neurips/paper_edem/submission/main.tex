@@ -80,17 +80,20 @@ The central technical claim of this paper is that two structural
 features---max-bid clearing and per-epoch feedback of clearing
 prices into agent valuations---generate persistent positive drift in
 realised market prices even when individual agents' estimation errors
-are exactly zero-mean. The mechanism is order-statistic bias: each
-seller selects the maximum of multiple noisy bids, and the maximum
-of $n$ zero-mean draws is, in expectation, strictly above their
-mean. Feeding the realised maximum back into the next round's anchor
-compounds the bias multiplicatively. No behavioural assumption about
-investor optimism, risk aversion, or attention is required.
+are exactly zero-mean. The mechanism is order-statistic bias.
+Each seller selects the maximum of multiple noisy bids, and the
+maximum of $n$ zero-mean draws sits, in expectation, strictly above
+their mean; the realised maximum then feeds back into the next
+round's anchor value, and the bias compounds multiplicatively. No
+behavioural assumption about investor optimism, risk aversion, or
+attention is required.
 
-This is a dynamic generalisation of the classical winner's curse
-\citep{thaler1988winners}: the same upper-tail-selection effect that
-biases the expected payment in a single common-value auction, fed
-epoch-to-epoch into the next anchor value, produces unbounded
+\citet{thaler1988winners} called this phenomenon the winner's curse
+and framed it as a behavioural failure: rational bid shading should,
+in principle, correct the expected payment. Our point is that the
+curse is an order-statistic effect before it is a behavioural one,
+and that iterating it---feeding each round's clearing price into the
+next round's anchor---turns a one-period bias into unbounded
 drift in market valuations.
 
 The implication for machine-learning valuation matters for the
@@ -131,18 +134,20 @@ adopt.
 \section{Background and Related Work}
 \label{sec:background}
 
-\citet{miller1977} proposed a static model in which the $N$ shares
-of a stock are sold to the $N$ most optimistic of $K > N$ potential
-investors, so the clearing price reflects the marginal optimist
-rather than the mean valuation. Greater divergence of opinion thus
-produces a price \emph{premium}, and (because future returns are
-earned against the elevated price) lower subsequent returns. The
-half-century of empirical literature that grew up around this claim
-has not converged: the \emph{discount} camp argues divergence of
-opinion proxies for risk and predicts higher future returns
-\citep{williams1977,mayshar1983,varian1985,merton1987,epsteinwang1994},
-while the \emph{premium} camp finds the opposite
-\citep{doukas2006}. \citet{moffitt2017} summarises the impasse.
+\citet{miller1977} proposed an elegant static argument: of $K$
+investors with heterogeneous beliefs, the $N$ most optimistic end
+up holding the $N$ available shares, so the clearing price reflects
+the marginal optimist rather than the mean valuation. Greater
+divergence of opinion thus produces a price \emph{premium}, and
+(because future returns are earned against the elevated price)
+lower subsequent returns. The half-century of empirical literature
+that grew up around this claim has not converged. One camp argues
+divergence of opinion proxies risk and predicts \emph{higher}
+future returns
+\citep{williams1977,mayshar1983,varian1985,merton1987,epsteinwang1994};
+another finds the opposite \citep{doukas2006}; \citet{moffitt2017}
+summarises the impasse. The empirical record is messy, and we will
+argue this is exactly what one should expect.
 
 The static framing is the source of the empirical confusion.
 Miller's model specifies a one-shot relationship between beliefs
@@ -244,6 +249,12 @@ mechanism.
 \section{The Order-Statistic Mechanism}
 \label{sec:mechanism}
 
+A concrete number first. With just two bidders ($n=2$) drawing zero-
+mean uniform errors of width $\sigma = 0.15$, the expected winning
+bid sits $5\%$ above fair value---per home, per epoch. Iterate that
+for 150 epochs and the implied compound is enormous. The closed form
+is what the rest of this section derives.
+
 \paragraph{Closed-form bias.}
 Consider a seller $s$ receiving $n \ge 2$ bids $\beta_i = v_t(h(s))(1+\varepsilon_i)$ with $\varepsilon_i \sim \mathcal{U}[-\sigma, +\sigma]$ iid. The expected winning bid is
 \begin{equation}
@@ -254,21 +265,21 @@ Consider a seller $s$ receiving $n \ge 2$ bids $\beta_i = v_t(h(s))(1+\varepsilo
 \end{equation}
 using the order-statistic identity for the maximum of $n$ iid
 uniform variates. The right-hand side strictly exceeds 1 for all
-$n \ge 2$ and $\sigma > 0$; the gap grows in both $n$ and $\sigma$.
+$n \ge 2$ and $\sigma > 0$; the gap---whether one calls it excess
+return or mispricing---grows in both $n$ and $\sigma$.
 
 \paragraph{Relation to the winner's curse.}
-Eq.~\eqref{eq:ostat-bias} also recovers the classical winner's curse
-as a static special case. In a common-value auction, the winning
+Eq.~\eqref{eq:ostat-bias} recovers the classical winner's curse as
+a static special case. In a common-value auction, the winning
 bidder is selected precisely because her signal is the most
-favourable draw among the bidder pool. The curse is thus an
-order-statistic selection effect before it is a behavioural
-failure: optimism is not required for the winning bid to be
-upward-selected. Rational bid shading can correct the expected
-payment in a static auction, but it does not remove the allocation
-fact that the winning signal comes from the upper tail. EDEM's
-contribution is to feed that upper-tail clearing price into the
-next period's valuation anchor, turning the one-period
-winner's-curse effect into a dynamic drift mechanism.
+favourable draw among the bidder pool. \citet{thaler1988winners}
+treats this as a behavioural failure; rational bid shading should
+correct the expected payment in any one round. Whether shading
+fully corrects, or only partially, is downstream of the structural
+fact: the winning signal comes from the upper tail, full stop.
+EDEM's contribution is to compound that fact---one round's
+clearing price becomes the next round's anchor---and to show that
+iteration alone turns a one-period bias into unbounded drift.
 
 \paragraph{What Eq.~\eqref{eq:ostat-bias} does and does not prove.}
 Eq.~\eqref{eq:ostat-bias} establishes that the seller-side maximum
@@ -320,7 +331,8 @@ Run 8 ($C_b=-1$, $\bar\sigma$ growing)    & 1.0287 & 24.9\% & $+0.0236$ & 1.000 
 EDEM is implemented in the Python ABM framework Mesa
 \citep{masad2015mesa} on a $32 \times 32$ toroidal
 $\mathtt{MultiGrid}$, matching the wrapped patch world of the
-original NetLogo prototypes from which this work descends. Per-cell
+original NetLogo prototypes \citep{wilensky1999} from which this
+work descends. Per-cell
 state ($v_t(h)$, $v^*(h)$, last sale price, last sale tick) is a
 lightweight dataclass attached to each grid cell; buyers and sellers
 are $\mathtt{mesa.Agent}$ subclasses. Bids are mirrored
@@ -334,12 +346,13 @@ Bernoulli swap with probability $|C_b| - \lfloor |C_b| \rfloor$;
 sign of $C_b$ controls direction. A population floor of one agent
 per side prevents the balancer from killing the last agent.
 
-The Mesa model and 42 pytest unit tests fit in under 600 lines
-including docstrings. Each experiment script seeds the model
-deterministically and runs 10 seeds. Total reproduction time on a
-2024-era laptop is approximately 25 minutes (CPU only). Code and
-data are released under MIT licence at a URL provided in the
-camera-ready version of this paper.
+The Mesa core lives in six modules under \texttt{edem/} totalling
+973 lines including docstrings; the 42 \texttt{pytest} unit tests
+sit in five files of similar density. Each experiment script seeds
+the model deterministically and runs 10 seeds. Total reproduction
+time on a 2024-era laptop is approximately 25 minutes (CPU only).
+Code and data are released under MIT licence at a URL provided in
+the camera-ready version of this paper.
 
 \section{Experiments and Results}
 \label{sec:experiments}
@@ -352,13 +365,14 @@ across seeds with the 10th--90th percentile band. Full parameter
 tables are in Appendix~\ref{app:params}; per-run figures for runs
 not shown inline here are in Appendix~\ref{app:allfigs}.
 
-\paragraph{The six regimes.} Table~\ref{tab:regimes} consolidates
-the end-of-run statistics. The eight runs sweep three parameter
-axes (estimation noise $\bar\sigma$, seller patience, balancer
-$C_b$) and produce six qualitatively distinct steady-state
-regimes---band-stable, business-cycle, persistent overshoot,
-persistent undershoot, runaway bubble, and constant transition---
-all reachable from the same agent ruleset.
+\paragraph{The six regimes.} Three parameter axes
+($\bar\sigma$, seller patience, $C_b$) and the same agent ruleset
+generate six qualitatively distinct steady states: band-stable,
+business-cycle, persistent overshoot, persistent undershoot,
+runaway bubble, and constant transition.
+Table~\ref{tab:regimes} consolidates the end-of-run statistics; we
+flag the one entry below the table that drives the rest of this
+section.
 
 \begin{table}[h]
 \centering
@@ -387,12 +401,14 @@ report $v_t/v^*$.}
 
 \paragraph{Bubble regime under no balancer.}
 With balancer disabled ($C_b = 0$) and $\bar\sigma = 0.15$, the
-market exhibits a clean log-linear bubble (Fig.~\ref{fig:bubble}):
-the median value-to-true ratio multiplies $\sim 421\times$ over
-3000 ticks, with a tight band. The mechanism is exactly that of
-Section~\ref{sec:mechanism}: each epoch's average winning ratio
+market exhibits a clean log-linear bubble: a median multiplicative
+gain of $\sim 421\times$ over 3000 ticks, with a tight band
+(Fig.~\ref{fig:bubble}). The mechanism is exactly that of
+Section~\ref{sec:mechanism}---each epoch's average winning ratio
 $\bar r_t$ is $>1$ in expectation, and Eq.~\eqref{eq:value-update}
-compounds it multiplicatively.
+compounds it multiplicatively. $C_b=0$ admits all of the upward
+bid-selection bias unfiltered, which is exactly what this
+configuration is meant to expose.
 
 \begin{figure}[h]
 \centering
@@ -405,18 +421,23 @@ agent counts (frozen at $20$ each because $C_b=0$).}
 
 \paragraph{Balancer-coefficient sweep.}
 Varying $C_b \in \{+1, 0, -1\}$ at fixed $\bar\sigma = 0.15$ yields
-three qualitatively distinct trajectories (Fig.~\ref{fig:balancer}):
-the mean-reverting case ($C_b=+1$) plateaus near $4\times$ as the
-population drifts toward sellers; the trend-following case
-($C_b=-1$) reaches $\sim 7.7\times$ with the population drifting
-toward buyers; the no-balancer case dominates both at $\sim 421\times$.
-This refines a prior claim in the literature that trend-following
-should be the most explosive regime: in the Mesa simulation, the
-trend-following balancer drains sellers to a single agent, leaving
-fewer total sellers to inflate; the no-balancer case maintains
-balanced populations and admits all of the upward bid-selection
-bias unfiltered. No setting of $C_b$ in this grid restores
-$v_t/v^* = 1$.
+three qualitatively distinct trajectories (Fig.~\ref{fig:balancer}).
+The mean-reverting case ($C_b=+1$) plateaus near $4\times$. The
+trend-following case ($C_b=-1$) reaches $\sim 7.7\times$. The
+no-balancer case dominates both at over $100\times$ either, ending
+near $421\times$. The intuitive guess, dating to earlier
+informal write-ups in this lineage, is that trend-following should
+be the most explosive regime---there is more aggregate bidding
+pressure when buyers swarm a shrinking pool of sellers. In the
+Mesa simulation the opposite holds. The trend-following balancer
+drains sellers to a single agent, and inflation needs sellers to
+inflate; the no-balancer case keeps populations balanced and
+admits the bid-selection bias undamped. The
+population panel of Fig.~\ref{fig:balancer} makes the mechanism
+visible: the $C_b=\pm 1$ trajectories collapse into a one-vs-many
+state within a few hundred ticks, while $C_b=0$ holds at the
+$20/20$ initialisation throughout. No setting of $C_b$ in this
+grid restores $v_t/v^* = 1$.
 
 \begin{figure}[h]
 \centering
@@ -431,11 +452,14 @@ induce.}
 \paragraph{Sensitivity to $C_b$ and $\bar\sigma$.}
 A $5\times 6$ grid sweeps $C_b \in \{-1, -0.5, 0, +0.5, +1\}$ and
 $\bar\sigma \in \{0.05, 0.10, 0.15, 0.20, 0.25, 0.30\}$, with 5
-seeds per cell at 1500 ticks (Fig.~\ref{fig:sensitivity}). Every
-cell of the grid has $v_t/v^* > 1$, and $43\%$ of cells exceed
-$10\times$ within $1500$ ticks. The order-statistic drift is
-universal across the parameter grid, not a corner case. $C_b = 0$
-dominates within every $\bar\sigma$ column.
+seeds per cell at 1500 ticks (Fig.~\ref{fig:sensitivity}). Two
+patterns emerge. First, the gap widens monotonically with
+$\bar\sigma$---larger divergence of opinion produces a larger
+multiplier, in every column. Second, every cell of the grid has
+$v_t/v^* > 1$, and the $C_b=0$ column dominates each row.
+Of the 30 cells, 13 exceed $10\times$ within 1500 ticks. The
+order-statistic drift is universal across the parameter grid we
+explored, not a corner case.
 
 \begin{figure}[h]
 \centering
@@ -482,16 +506,17 @@ functions as a positively-biased point estimator that may provide
 the market with a coordinating signal pulling realised winning
 bids further upward, feeding back into the next training cycle.
 
-A defensible deployment would correct for this: predict the
-median rather than the mean of plausible sale prices; use a
-censored-data likelihood that accounts for the offer-acceptance
-threshold; or use an explicitly rank-aware estimator that targets
-fair value rather than winning-bid value. The 2021 wind-down of
-Zillow's algorithmic-iBuying programme \citep{zillow2021ibuying}
-is one episode in which a clearing-price-anchored valuation system
-at scale incurred substantial losses; we do not advance EDEM as a
-complete account of that specific event, but the public record is
-consistent with the mechanism here.
+The fix is structural, not a hyperparameter knob. A defensible
+deployment would predict the median rather than the mean of
+plausible sale prices, use a censored-data likelihood that accounts
+for the offer-acceptance threshold, or substitute an explicitly
+rank-aware estimator that targets fair value instead of
+winning-bid value. The 2021 wind-down of Zillow's algorithmic-iBuying
+programme \citep{zillow2021ibuying} is one episode in which a
+clearing-price-anchored valuation system at scale incurred
+substantial losses; the public record is consistent with the
+mechanism described here, though we do not advance EDEM as a
+complete account of that specific event.
 
 \paragraph{Why empirical premium/discount studies disagree.}
 Each empirical sample of the divergence-of-opinion premium is a
