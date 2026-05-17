@@ -144,10 +144,14 @@ lower subsequent returns. The half-century of empirical literature
 that grew up around this claim has not converged. One camp argues
 divergence of opinion proxies risk and predicts \emph{higher}
 future returns
-\citep{williams1977,mayshar1983,varian1985,merton1987,epsteinwang1994};
-another finds the opposite \citep{doukas2006}; \citet{moffitt2017}
-summarises the impasse. The empirical record is messy, and we will
-argue this is exactly what one should expect.
+\citep{williams1977,mayshar1983,varian1985,merton1987,epsteinwang1994,doukas2006};
+another, anchored by \citet{dietherMalloyScherbina2002}, finds the
+opposite empirically---lower future returns for high-dispersion
+stocks, consistent with Miller's premium. \citet{moffitt2017}
+catches the spirit of the impasse: no single theory of price
+formation has satisfied both market practitioners and theorists.
+The empirical record is messy, and we will argue this is exactly
+what one should expect.
 
 The static framing is the source of the empirical confusion.
 Miller's model specifies a one-shot relationship between beliefs
@@ -511,12 +515,12 @@ deployment would predict the median rather than the mean of
 plausible sale prices, use a censored-data likelihood that accounts
 for the offer-acceptance threshold, or substitute an explicitly
 rank-aware estimator that targets fair value instead of
-winning-bid value. The 2021 wind-down of Zillow's algorithmic-iBuying
-programme \citep{zillow2021ibuying} is one episode in which a
-clearing-price-anchored valuation system at scale incurred
-substantial losses; the public record is consistent with the
-mechanism described here, though we do not advance EDEM as a
-complete account of that specific event.
+winning-bid value. The Q3 2021 disclosures of Zillow's
+algorithmic-iBuying losses \citep{zillow2021ibuying} document one
+episode in which a clearing-price-anchored valuation system at
+scale incurred substantial losses; the public record is consistent
+with the mechanism described here, though we do not advance EDEM
+as a complete account of that specific event.
 
 \paragraph{Why empirical premium/discount studies disagree.}
 Each empirical sample of the divergence-of-opinion premium is a
@@ -551,6 +555,11 @@ valuation model trained on historical clearing prices is by
 construction fitting an upper-order statistic, and selection-aware
 estimation is a deployment-time requirement, not an academic
 nicety.
+
+% Keep the 2018 self-citations in the rendered bibliography even if
+% the checklist (where they are otherwise cited) is stripped from a
+% derivative build.
+\nocite{arbuzov2018de,arbuzov2018edem}
 
 \bibliographystyle{plainnat}
 \bibliography{references}
